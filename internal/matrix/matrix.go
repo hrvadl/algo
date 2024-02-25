@@ -66,7 +66,7 @@ func (m *Matrix) JordanEliminate(col, row int) (Matrix, error) {
 	resm := m.Copy()
 	eliminated := resm.Rows[row][col]
 	if eliminated == 0 {
-		return Matrix{}, DivideByZeroError{}
+		return Matrix{}, errors.New("divide by zero")
 	}
 
 	resm.Rows[row][col] = 1
@@ -179,7 +179,7 @@ func (m *Matrix) Copy() Matrix {
 
 func (m *Matrix) DivideBy(n float64) (Matrix, error) {
 	if n == 0 {
-		return Matrix{}, DivideByZeroError{}
+		return Matrix{}, errors.New("divide by zero")
 	}
 
 	resm := m.Copy()

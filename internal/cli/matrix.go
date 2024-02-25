@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,10 +11,6 @@ import (
 )
 
 func GetMatrix(rows, columns int) (matrix.Matrix, error) {
-	if rows < 2 || columns < 2 {
-		return matrix.Matrix{}, errors.New("invalid size of the matrix")
-	}
-
 	m := matrix.Matrix{
 		Rows: make([]matrix.Row, rows),
 	}

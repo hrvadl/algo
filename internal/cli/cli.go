@@ -71,16 +71,18 @@ func HandleGetRank() {
 	m.Print()
 
 	rank := m.Rank()
-	fmt.Printf("\nThe rank of your matrix is: %v", rank)
+	fmt.Printf("\nThe rank of your matrix is: %v\n", rank)
 }
 
 func HandleSolveLinearEquation() {
+	fmt.Println("\nInput your A matrix: ")
 	a, err := HandleGetMatrix()
 	if err != nil {
 		PrintError(err)
 		return
 	}
 
+	fmt.Println("\nInput your B matrix: ")
 	b, err := HandleGetMatrix()
 	if err != nil {
 		PrintError(err)
@@ -90,6 +92,7 @@ func HandleSolveLinearEquation() {
 	_, ha := a.GetDimensions()
 	_, hb := b.GetDimensions()
 	if ha != hb {
+		fmt.Printf("ha: %v, hb: %v", ha, hb)
 		PrintError(errors.New("matrixes are not compatible"))
 		return
 	}
