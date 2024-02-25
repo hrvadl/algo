@@ -23,5 +23,5 @@ func PrintError(err error) {
 }
 
 func PrintExitMessage() {
-	fmt.Printf("\nThe program is terminated... Bye!")
+	fmt.Printf("\nThe program is terminated... Bye!\n")
 }

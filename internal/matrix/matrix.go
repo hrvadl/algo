@@ -46,8 +46,8 @@ func (m *Matrix) Invert() (Matrix, error) {
 		return Matrix{}, errors.New("cannot inverse not square matrix")
 	}
 
-	if !m.IsNonDegenerate() {
-		return Matrix{}, errors.New("cannot inverse non degenerate matrix")
+	if !m.IsNonDeterministic() {
+		return Matrix{}, errors.New("cannot inverse non deterministic matrix")
 	}
 
 	resm := *m
@@ -89,7 +89,7 @@ func (m *Matrix) JordanEliminate(col, row int) (Matrix, error) {
 	return resm.DivideBy(eliminated)
 }
 
-func (m *Matrix) IsNonDegenerate() bool {
+func (m *Matrix) IsNonDeterministic() bool {
 	return m.Determinant() != 0
 }
 
