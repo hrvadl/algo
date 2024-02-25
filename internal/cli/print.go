@@ -19,7 +19,7 @@ func PrintHelp() {
 }
 
 func PrintError(err error) {
-	fmt.Printf("Error occurred: %v", err)
+	fmt.Printf("Error occurred: %v\n", err)
 }
 
 func PrintExitMessage() {
