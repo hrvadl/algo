@@ -8,7 +8,7 @@ type EquationSystem struct {
 }
 
 func SolveSystem(s EquationSystem) []float64 {
-	swapped, _ := s.A.SwapAll()
+	swapped, _, _ := s.A.SwapAll()
 	res := make([]float64, 0, len(swapped.Rows))
 
 	for _, row := range swapped.Rows {

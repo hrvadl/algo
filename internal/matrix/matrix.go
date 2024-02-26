@@ -13,32 +13,20 @@ type Matrix struct {
 }
 
 func (m *Matrix) Rank() int {
+	_, rank, _ := m.SwapAll()
+	return rank
+}
+
+func (m *Matrix) SwapAll() (Matrix, int, error) {
 	var rank int
 	resm := *m
-	for i, row := range resm.Rows {
-		if i > len(row)-1 {
-			continue
-		}
+	for i := 0; i < len(resm.Rows) && i < len(resm.Rows[i]); i++ {
 		var err error
 		if resm, err = resm.JordanEliminate(i, i); err == nil {
 			rank++
 		}
 	}
-	return rank
-}
-
-func (m *Matrix) SwapAll() (Matrix, error) {
-	resm := *m
-	for i, row := range resm.Rows {
-		if i > len(row)-1 {
-			break
-		}
-		var err error
-		if resm, err = resm.JordanEliminate(i, i); err != nil {
-			return Matrix{}, err
-		}
-	}
-	return resm, nil
+	return resm, rank, nil
 }
 
 func (m *Matrix) Invert() (Matrix, error) {
@@ -46,8 +34,8 @@ func (m *Matrix) Invert() (Matrix, error) {
 		return Matrix{}, errors.New("cannot inverse not square matrix")
 	}
 
-	if !m.IsNonDeterministic() {
-		return Matrix{}, errors.New("cannot inverse non deterministic matrix")
+	if m.IsDegenerate() {
+		return Matrix{}, errors.New("cannot inverse degenerate matrix")
 	}
 
 	resm := *m
@@ -79,18 +67,17 @@ func (m *Matrix) JordanEliminate(col, row int) (Matrix, error) {
 
 	for i, rowRes := range resm.Rows {
 		for j := range rowRes {
-			if i == row || j == col {
-				continue
+			if i != row && j != col {
+				resm.Rows[i][j] = m.Rows[i][j]*eliminated - m.Rows[i][col]*m.Rows[row][j]
 			}
-			resm.Rows[i][j] = m.Rows[i][j]*eliminated - m.Rows[i][col]*m.Rows[row][j]
 		}
 	}
 
 	return resm.DivideBy(eliminated)
 }
 
-func (m *Matrix) IsNonDeterministic() bool {
-	return m.Determinant() != 0
+func (m *Matrix) IsDegenerate() bool {
+	return m.Determinant() == 0
 }
 
 func (m *Matrix) IsSquare() bool {
@@ -111,24 +98,25 @@ func (m *Matrix) Determinant() float64 {
 		return m.Rows[0][0]*m.Rows[1][1] - m.Rows[0][1]*m.Rows[1][0]
 	}
 
-	var res float64
-	col := 0
+	var (
+		det float64
+		col int
+	)
+
 	for row := range m.Rows[0] {
 		coef := m.Rows[row][col]
 		sign := m.GetSignForAlgebraicAddition(col, row)
 		minor := m.MinorFor(col, row)
-		res += coef * sign * minor.Determinant()
+		det += coef * sign * minor.Determinant()
 	}
 
-	return res
+	return det
 }
 
 func (m *Matrix) GetDimensions() (length, height int) {
 	height = len(m.Rows)
-	for _, row := range m.Rows {
-		if rowl := len(row); rowl > length {
-			length = rowl
-		}
+	if height > 0 {
+		length = len(m.Rows[0])
 	}
 	return length, height
 }
