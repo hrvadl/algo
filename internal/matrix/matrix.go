@@ -113,12 +113,12 @@ func (m *Matrix) Determinant() float64 {
 	return det
 }
 
-func (m *Matrix) GetDimensions() (length, height int) {
-	height = len(m.Rows)
-	if height > 0 {
-		length = len(m.Rows[0])
+func (m *Matrix) GetDimensions() (col, rows int) {
+	rows = len(m.Rows)
+	if rows > 0 {
+		col = len(m.Rows[0])
 	}
-	return length, height
+	return col, rows
 }
 
 func (m *Matrix) GetSignForAlgebraicAddition(col, row int) float64 {
