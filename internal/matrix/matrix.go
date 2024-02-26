@@ -41,8 +41,7 @@ func (m *Matrix) Invert() (Matrix, error) {
 	resm := *m
 	for i := range m.Rows {
 		var err error
-		resm, err = resm.JordanEliminate(i, i)
-		if err != nil {
+		if resm, err = resm.JordanEliminate(i, i); err != nil {
 			return resm, err
 		}
 	}
