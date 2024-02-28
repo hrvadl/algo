@@ -6,12 +6,15 @@ import (
 	"strconv"
 )
 
+type Option = string
+
 const (
-	ExitOption = iota
-	InverseMatrixOption
-	GetRankOption
-	SolveLinearEquationOption
-	HelpOption
+	ExitOption                = "exit"
+	InverseMatrixOption       = "inverse"
+	GetRankOption             = "rank"
+	SolveLinearEquationOption = "solve_linear"
+	HelpOption                = "help"
+	ClearOption               = "clear"
 )
 
 func ReadInt() (int, error) {
@@ -28,17 +31,19 @@ func ReadInt() (int, error) {
 	return option, err
 }
 
-func ChooseOption() (int, error) {
-	option, err := ReadInt()
-	if err != nil {
-		return 0, err
+func ChooseOption() (Option, error) {
+	var option string
+	if _, err := fmt.Scanln(&option); err != nil {
+		return "", errors.New("invalid input")
 	}
 
 	if option != InverseMatrixOption &&
 		option != GetRankOption &&
 		option != SolveLinearEquationOption &&
-		option != HelpOption && option != ExitOption {
-		return 0, errors.New("invalid options is chosen")
+		option != HelpOption &&
+		option != ExitOption &&
+		option != ClearOption {
+		return "", errors.New("invalid options is chosen")
 	}
 
 	return option, nil

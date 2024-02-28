@@ -2,13 +2,19 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/hrvadl/algo/internal/equations"
 	"github.com/hrvadl/algo/internal/matrix"
+	"github.com/hrvadl/algo/pkg/tm"
 )
 
+const GracefulShutdownTime = 2 * time.Second
+
 func Start() {
-loop:
 	for {
 		PrintHelp()
 		option, err := ChooseOption()
@@ -24,10 +30,12 @@ loop:
 			HandleGetRank()
 		case HelpOption:
 			PrintHelp()
+		case ClearOption:
+			tm.Clear()
 		case SolveLinearEquationOption:
 			HandleSolveLinearEquation()
 		case ExitOption:
-			break loop
+			os.Exit(0)
 		}
 	}
 }
@@ -115,4 +123,12 @@ func HandleGetMatrix() (matrix.Matrix, error) {
 	}
 
 	return GetMatrix(rows, col)
+}
+
+func HandleGracefulShutdown() {
+	terminated := make(chan os.Signal, 1)
+	signal.Notify(terminated, syscall.SIGINT, syscall.SIGTERM)
+	reason := <-terminated
+	fmt.Printf("\nReceived: %v. Terminating...\n", reason.String())
+	time.Sleep(GracefulShutdownTime)
 }

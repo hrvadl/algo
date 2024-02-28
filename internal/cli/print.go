@@ -10,11 +10,12 @@ func PrintStudentInfo() {
 
 func PrintHelp() {
 	fmt.Println()
-	fmt.Println("Exit the program: 0")
-	fmt.Println("Calculate inverse matrix: 1")
-	fmt.Println("Calculate rank of the matrix: 2")
-	fmt.Println("Calculate linear equation system: 3")
-	fmt.Println("Print this message: 4")
+	fmt.Printf("Exit the program:                    %s\n", ExitOption)
+	fmt.Printf("Calculate inverse matrix:            %s\n", InverseMatrixOption)
+	fmt.Printf("Calculate rank of the matrix:        %s\n", GetRankOption)
+	fmt.Printf("Calculate linear equation system:    %s\n", SolveLinearEquationOption)
+	fmt.Printf("Print this message:                  %s\n", HelpOption)
+	fmt.Printf("Clear the screen:                    %s\n", ClearOption)
 	fmt.Println()
 }
 
