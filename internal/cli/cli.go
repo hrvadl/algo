@@ -35,6 +35,7 @@ func Start() {
 		case SolveLinearEquationOption:
 			HandleSolveLinearEquation()
 		case ExitOption:
+			PrintExitMessage()
 			os.Exit(0)
 		}
 	}
