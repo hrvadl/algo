@@ -38,7 +38,6 @@ func TestCalculateDeterminant(t *testing.T) {
 	}
 
 	for _, tt := range tc {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			if actual := tt.m.Determinant(); actual != tt.expected {
@@ -91,7 +90,6 @@ func TestInvertMatrix(t *testing.T) {
 	}
 
 	for _, tt := range tc {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			actual, _ := tt.m.Invert()
@@ -128,7 +126,6 @@ func TestJordanElimination(t *testing.T) {
 	}
 
 	for _, tt := range tc {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			actual, _ := tt.m.JordanEliminate(0, 0)
@@ -181,7 +178,6 @@ func TestCalculateRank(t *testing.T) {
 	}
 
 	for _, tt := range tc {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			if actual := tt.m.Rank(); actual != tt.expected {
 				t.Errorf("expected %v, got %v", tt.expected, actual)

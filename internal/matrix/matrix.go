@@ -136,8 +136,8 @@ func (m *Matrix) MinorFor(col, row int) Matrix {
 		Rows: make([][]float64, len(m.Rows)-1),
 	}
 
-	for i := 0; i < len(m.Rows); i++ {
-		for j := 0; j < len(m.Rows[i]); j++ {
+	for i := range len(m.Rows) {
+		for j := range len(m.Rows[i]) {
 			if j == col || i == row {
 				continue
 			}

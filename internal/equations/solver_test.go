@@ -56,7 +56,6 @@ func TestSolveSystem(t *testing.T) {
 	}
 
 	for _, tt := range tc {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			if actual := SolveSystem(tt.sys); !reflect.DeepEqual(actual, tt.expected) {
