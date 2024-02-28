@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hrvadl/algo/internal/equations"
@@ -11,6 +10,7 @@ import (
 func Start() {
 loop:
 	for {
+		PrintHelp()
 		option, err := ChooseOption()
 		if err != nil {
 			PrintError(err)
@@ -83,19 +83,14 @@ func HandleSolveLinearEquation() {
 	}
 
 	fmt.Println("\nInput your B matrix: ")
-	b, err := HandleGetMatrix()
+	_, rows := a.GetDimensions()
+	b, err := GetMatrix(rows, 1)
 	if err != nil {
 		PrintError(err)
 		return
 	}
 
-	_, ha := a.GetDimensions()
-	_, hb := b.GetDimensions()
-	if ha != hb {
-		fmt.Printf("ha: %v, hb: %v", ha, hb)
-		PrintError(errors.New("matrixes are not compatible"))
-		return
-	}
+	fmt.Println()
 
 	res := equations.SolveSystem(equations.EquationSystem{
 		A: a,
@@ -103,7 +98,7 @@ func HandleSolveLinearEquation() {
 	})
 
 	fmt.Println("\nThe result of solving equation: ")
-	fmt.Printf("%v", res)
+	fmt.Printf("%v\n", res)
 }
 
 func HandleGetMatrix() (matrix.Matrix, error) {

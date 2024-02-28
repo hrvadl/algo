@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,6 +12,10 @@ import (
 )
 
 func GetMatrix(rows, columns int) (matrix.Matrix, error) {
+	if rows < 0 || columns < 0 {
+		return matrix.Matrix{}, errors.New("can't create a matrix with the zero size")
+	}
+
 	m := matrix.Matrix{
 		Rows: make([]matrix.Row, rows),
 	}

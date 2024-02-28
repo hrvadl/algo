@@ -22,7 +22,11 @@ func (m *Matrix) SwapAll() (Matrix, int, error) {
 	resm := *m
 	for i := 0; i < len(resm.Rows) && i < len(resm.Rows[i]); i++ {
 		var err error
+		eliminated := RoundTo(resm.Rows[i][i], 2)
 		if resm, err = resm.JordanEliminate(i, i); err == nil {
+			fmt.Printf("\nStep #%v. Element: %v. Results: \n", i+1, eliminated)
+			rounded := resm.Round()
+			rounded.Print()
 			rank++
 		}
 	}
@@ -201,8 +205,6 @@ func (m *Matrix) Print() {
 		}
 		fmt.Println()
 	}
-
-	fmt.Println()
 }
 
 func RoundTo(num float64, precision int) float64 {

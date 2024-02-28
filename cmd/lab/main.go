@@ -6,7 +6,6 @@ import (
 
 func main() {
 	cli.PrintStudentInfo()
-	cli.PrintHelp()
 	cli.Start()
 	cli.PrintExitMessage()
 }
