@@ -136,6 +136,48 @@ func TestJordanElimination(t *testing.T) {
 	}
 }
 
+func TestJordanEliminationModified(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		col      int
+		row      int
+		expected Matrix
+	}{
+		{
+			name: "Should calculate correct result",
+			col:  0,
+			row:  1,
+			m: Matrix{
+				Rows: []Row{
+					{1, 1, -1, -2, 6},
+					{-1, -1, -1, 1, -5},
+					{2, -1, 3, 4, 10},
+					{-1, -2, 1, 1, 0},
+				},
+			},
+			expected: Matrix{
+				Rows: []Row{
+					{1, 0, -2, -1, 1},
+					{-1, 1, 1, -1, 5},
+					{2, -3, 1, 6, 0},
+					{-1, -1, 2, 0, 5},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			actual, _ := tt.m.JordanEliminateModified(tt.col, tt.row)
+			if actual := actual.Round(); !reflect.DeepEqual(actual, tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, actual)
+			}
+		})
+	}
+}
+
 func TestCalculateRank(t *testing.T) {
 	tc := []struct {
 		name     string

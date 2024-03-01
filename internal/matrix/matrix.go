@@ -61,10 +61,34 @@ func (m *Matrix) JordanEliminate(col, row int) (Matrix, error) {
 	}
 
 	resm.Rows[row][col] = 1
-
 	for i := range resm.Rows[row] {
 		if i != col {
 			resm.Rows[row][i] *= -1
+		}
+	}
+
+	for i, rowRes := range resm.Rows {
+		for j := range rowRes {
+			if i != row && j != col {
+				resm.Rows[i][j] = m.Rows[i][j]*eliminated - m.Rows[i][col]*m.Rows[row][j]
+			}
+		}
+	}
+
+	return resm.DivideBy(eliminated)
+}
+
+func (m *Matrix) JordanEliminateModified(col, row int) (Matrix, error) {
+	resm := m.Copy()
+	eliminated := resm.Rows[row][col]
+	if eliminated == 0 {
+		return Matrix{}, errors.New("divide by zero")
+	}
+
+	resm.Rows[row][col] = 1
+	for i := range resm.Rows {
+		if i != row {
+			resm.Rows[i][col] *= -1
 		}
 	}
 
