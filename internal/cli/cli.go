@@ -153,7 +153,7 @@ func HandleSolveLinearInequation() {
 	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
 	m.Print()
 
-	fmt.Println("Do you want to find min or max?")
+	fmt.Printf("\nDo you want to find min or max?\n")
 	minMax, err := ReadWord()
 	if err != nil {
 		PrintError(err)

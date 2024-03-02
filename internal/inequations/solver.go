@@ -65,7 +65,7 @@ func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
 		}, nil
 	}
 
-	row, err := findRowToEliminate(m, col)
+	row, err := findMinPositiveFor(m, col)
 	if err != nil {
 		return nil, err
 	}
@@ -75,6 +75,7 @@ func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
 		return nil, err
 	}
 
+	fmt.Printf("\nElement col: %v row: %v, Matrix:\n\n", col, row)
 	rm := m.Round()
 	rm.Print()
 
@@ -114,7 +115,7 @@ func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, err
 		)
 	}
 
-	row, err := findRowToEliminate(m, col)
+	row, err := findMinPositiveFor(m, col)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -124,15 +125,17 @@ func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, err
 		return nil, nil, err
 	}
 
+	fmt.Printf("\nElement col: %v row: %v, Matrix:\n\n", col, row)
 	rm := m.Round()
 	rm.Print()
 	return FindMaxWithSupportSolution(m)
 }
 
-func findRowToEliminate(m matrix.Matrix, col int) (row int, err error) {
+func findMinPositiveFor(m matrix.Matrix, col int) (row int, err error) {
 	min := 0.
 	row = -1
 	lastCol := len(m.Rows[0]) - 1
+
 	for j := 0; j < len(m.Rows)-1; j++ {
 		if m.Rows[j][col] == 0 {
 			continue
