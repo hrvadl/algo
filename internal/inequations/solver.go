@@ -41,17 +41,9 @@ func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
 	lastCol := len(m.Rows[0]) - 1
 	lastRow := len(m.Rows) - 1
 	res := make([]float64, lastCol)
-	col := -1
 
-	fmt.Printf("\nFinding the optimal solution...\n")
-	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
-		if m.Rows[lastRow][i] < 0 {
-			col = i
-			break
-		}
-	}
-
-	if col == -1 {
+	col, err := m.FirstNegativeColumnInLastRow()
+	if err != nil {
 		for row, variable := range m.LeftTitle {
 			if variable.IsX() {
 				res[variable.Index] = m.Rows[row][lastCol]
@@ -84,16 +76,9 @@ func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
 func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
 	lastCol := len(m.Rows[0]) - 1
 	res := make([]float64, lastCol)
-	negativeInLastCol := -1
 
-	for i := 0; i < len(m.Rows)-1; i++ {
-		if m.Rows[i][lastCol] < 0 {
-			negativeInLastCol = i
-			break
-		}
-	}
-
-	if negativeInLastCol == -1 {
+	negativeInLastCol, err := m.FirstNegativeRowInLastColumn()
+	if err != nil {
 		for row, variable := range m.LeftTitle {
 			if variable.IsX() {
 				res[variable.Index] = m.Rows[row][lastCol]
@@ -102,16 +87,9 @@ func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, err
 		return res, &m, nil
 	}
 
-	col, err := m.FirstNegativeInRow(negativeInLastCol)
+	col, err := m.FirstNegativeInRowExceptLastColumn(negativeInLastCol)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	if col == lastCol {
-		return nil, nil, fmt.Errorf(
-			"no negative numbers are found in the row %v",
-			negativeInLastCol,
-		)
 	}
 
 	row, err := m.FindMinPositiveFor(col)

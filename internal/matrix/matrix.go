@@ -207,6 +207,33 @@ func (m *Matrix) Copy() Matrix {
 	return res
 }
 
+func (m *Matrix) FirstNegativeRowInLastColumn() (int, error) {
+	lastCol := len(m.Rows[0]) - 1
+	for i := 0; i < len(m.Rows)-1; i++ {
+		if m.Rows[i][lastCol] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("no negatives found")
+}
+
+func (m *Matrix) FirstNegativeColumnInLastRow() (int, error) {
+	lastRow := len(m.Rows) - 1
+	fmt.Printf("\nFinding the optimal solution...\n")
+	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
+		if m.Rows[lastRow][i] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("no negatives found")
+}
+
+func (m *Matrix) Delete() (Matrix, error) {
+	return Matrix{}, nil
+}
+
 func (m *Matrix) DivideBy(n float64) (Matrix, error) {
 	if n == 0 {
 		return Matrix{}, errors.New("divide by zero")
@@ -233,9 +260,9 @@ func (m *Matrix) Round() Matrix {
 	return resm
 }
 
-func (m *Matrix) FirstNegativeInRow(row int) (col int, err error) {
-	for i, el := range m.Rows[row] {
-		if el < 0 {
+func (m *Matrix) FirstNegativeInRowExceptLastColumn(row int) (col int, err error) {
+	for i := 0; i < len(m.Rows[row])-1; i++ {
+		if m.Rows[row][i] < 0 {
 			return i, nil
 		}
 	}
