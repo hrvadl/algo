@@ -57,19 +57,19 @@ func TestFindMaxWithOptimalSolution(t *testing.T) {
 		expected matrix.Row
 		max      float64
 	}{
-		// {
-		// 	name: "Should solve inequation correctly",
-		// 	m: matrix.Matrix{
-		// 		Rows: []matrix.Row{
-		// 			{-1, 0, 3, -2, 1, 3},
-		// 			{1, -1, 0, 1, 1, 3},
-		// 			{-1, -3, 1, 1, -1, -2},
-		// 			{-1, 1, 0, 0, 1, 0},
-		// 		},
-		// 	},
-		// 	expected: matrix.Row{3, 0, 0, 0, 0},
-		// 	max: 3,
-		// },
+		{
+			name: "Should solve inequation correctly",
+			m: matrix.Matrix{
+				Rows: []matrix.Row{
+					{-1, 0, 3, -2, 1, 3},
+					{1, -1, 0, 1, 1, 3},
+					{-1, -3, 1, 1, -1, -2},
+					{-1, 1, 0, 0, 1, 0},
+				},
+			},
+			expected: matrix.Row{3, 0, 0, 0, 0},
+			max:      3,
+		},
 		{
 			name: "Should solve inequation correctly",
 			m: matrix.Matrix{

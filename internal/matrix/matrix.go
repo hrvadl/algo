@@ -17,6 +17,10 @@ func (v Variable) IsX() bool {
 	return v.Name == "x"
 }
 
+func (v Variable) IsZero() bool {
+	return v.Name == "0"
+}
+
 type Matrix struct {
 	Rows      []Row
 	LeftTitle map[int]Variable
@@ -207,31 +211,71 @@ func (m *Matrix) Copy() Matrix {
 	return res
 }
 
-func (m *Matrix) FirstNegativeRowInLastColumn() (int, error) {
-	lastCol := len(m.Rows[0]) - 1
-	for i := 0; i < len(m.Rows)-1; i++ {
-		if m.Rows[i][lastCol] < 0 {
-			return i, nil
+func (m *Matrix) DeleteZeros() (Matrix, error) {
+	toDelete := -1
+	for row, variable := range m.LeftTitle {
+		if variable.IsZero() {
+			toDelete = row
+			break
 		}
 	}
 
-	return 0, errors.New("no negatives found")
+	if toDelete == -1 {
+		return *m, nil
+	}
+
+	newM, err := m.DeleteRow(toDelete)
+	if err != nil {
+		return Matrix{}, err
+	}
+
+	return newM.DeleteZeros()
 }
 
-func (m *Matrix) FirstNegativeColumnInLastRow() (int, error) {
-	lastRow := len(m.Rows) - 1
-	fmt.Printf("\nFinding the optimal solution...\n")
-	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
-		if m.Rows[lastRow][i] < 0 {
-			return i, nil
+func (m *Matrix) DeleteRow(row int) (Matrix, error) {
+	col, err := m.FirstPositiveInRowExceptLastColumn(row)
+	if err != nil {
+		return Matrix{}, fmt.Errorf("can't delete. no positive elements in row %v", row)
+	}
+
+	toDeleteRow, err := m.FindMinPositiveFor(col)
+	if err != nil {
+		return Matrix{}, fmt.Errorf("can't delete. %w", err)
+	}
+
+	newM, err := m.JordanEliminateModified(col, toDeleteRow)
+	if err != nil {
+		return Matrix{}, err
+	}
+
+	for i, row := range newM.Rows {
+		for j := range row {
+			if j <= col {
+				continue
+			}
+
+			newM.Rows[i][j-1] = newM.Rows[i][j]
+		}
+
+		newM.Rows[i] = newM.Rows[i][:len(row)-1]
+	}
+
+	delete(newM.TopTitle, col)
+	tmp := make([]Variable, len(newM.TopTitle))
+	for i, variable := range newM.TopTitle {
+		if i < col {
+			tmp[i] = variable
+		} else {
+			tmp[i-1] = variable
 		}
 	}
 
-	return 0, errors.New("no negatives found")
-}
+	clear(newM.TopTitle)
+	for i, variable := range tmp {
+		newM.TopTitle[i] = variable
+	}
 
-func (m *Matrix) Delete() (Matrix, error) {
-	return Matrix{}, nil
+	return newM, nil
 }
 
 func (m *Matrix) DivideBy(n float64) (Matrix, error) {
@@ -268,6 +312,39 @@ func (m *Matrix) FirstNegativeInRowExceptLastColumn(row int) (col int, err error
 	}
 
 	return 0, fmt.Errorf("no negative numbers found in the row %v", row)
+}
+
+func (m *Matrix) FirstPositiveInRowExceptLastColumn(row int) (int, error) {
+	for i := 0; i < len(m.Rows[row])-1; i++ {
+		if m.Rows[row][i] > 0 {
+			return i, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no negative numbers found in the row %v", row)
+}
+
+func (m *Matrix) FirstNegativeRowInLastColumn() (int, error) {
+	lastCol := len(m.Rows[0]) - 1
+	for i := 0; i < len(m.Rows)-1; i++ {
+		if m.Rows[i][lastCol] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("no negatives found")
+}
+
+func (m *Matrix) FirstNegativeColumnInLastRow() (int, error) {
+	lastRow := len(m.Rows) - 1
+	fmt.Printf("\nFinding the optimal solution...\n")
+	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
+		if m.Rows[lastRow][i] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("no negatives found")
 }
 
 func (m *Matrix) FindMinPositiveFor(col int) (row int, err error) {
@@ -311,13 +388,18 @@ func (m *Matrix) SetSwapped(col, row int) {
 }
 
 func (m *Matrix) fillTitleMaps() {
-	m.LeftTitle = make(map[int]Variable)
-	m.TopTitle = make(map[int]Variable)
-	for i := range m.Rows {
-		m.LeftTitle[i] = Variable{"y", i}
+	if m.LeftTitle == nil {
+		m.LeftTitle = make(map[int]Variable)
+		for i := range m.Rows {
+			m.LeftTitle[i] = Variable{"y", i}
+		}
 	}
-	for i := range m.Rows[0] {
-		m.TopTitle[i] = Variable{"x", i}
+
+	if m.TopTitle == nil {
+		m.TopTitle = make(map[int]Variable)
+		for i := range m.Rows[0] {
+			m.TopTitle[i] = Variable{"x", i}
+		}
 	}
 }
 
