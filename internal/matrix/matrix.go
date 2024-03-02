@@ -8,8 +8,19 @@ import (
 
 type Row = []float64
 
+type Variable struct {
+	Name  string
+	Index int
+}
+
+func (v Variable) IsX() bool {
+	return v.Name == "x"
+}
+
 type Matrix struct {
-	Rows []Row
+	Rows      []Row
+	LeftTitle map[int]Variable
+	TopTitle  map[int]Variable
 }
 
 func (m *Matrix) Rank() int {
@@ -61,6 +72,7 @@ func (m *Matrix) JordanEliminate(col, row int) (Matrix, error) {
 	}
 
 	resm.Rows[row][col] = 1
+	resm.SetSwapped(col, row)
 	for i := range resm.Rows[row] {
 		if i != col {
 			resm.Rows[row][i] *= -1
@@ -86,6 +98,7 @@ func (m *Matrix) JordanEliminateModified(col, row int) (Matrix, error) {
 	}
 
 	resm.Rows[row][col] = 1
+	resm.SetSwapped(col, row)
 	for i := range resm.Rows {
 		if i != row {
 			resm.Rows[i][col] *= -1
@@ -180,7 +193,9 @@ func (m *Matrix) MinorFor(col, row int) Matrix {
 
 func (m *Matrix) Copy() Matrix {
 	res := Matrix{
-		Rows: make([][]float64, len(m.Rows)),
+		Rows:      make([][]float64, len(m.Rows)),
+		LeftTitle: m.LeftTitle,
+		TopTitle:  m.TopTitle,
 	}
 
 	for i, row := range m.Rows {
@@ -216,6 +231,35 @@ func (m *Matrix) Round() Matrix {
 	}
 
 	return resm
+}
+
+func (m *Matrix) FirstNegativeInRow(row int) (col int, err error) {
+	for i, el := range m.Rows[row] {
+		if el < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no negative numbers found in the row %v", row)
+}
+
+func (m *Matrix) SetSwapped(col, row int) {
+	if m.LeftTitle == nil || m.TopTitle == nil {
+		m.fillTitleMaps()
+	}
+
+	m.TopTitle[col], m.LeftTitle[row] = m.LeftTitle[row], m.TopTitle[col]
+}
+
+func (m *Matrix) fillTitleMaps() {
+	m.LeftTitle = make(map[int]Variable)
+	m.TopTitle = make(map[int]Variable)
+	for i := range m.Rows {
+		m.LeftTitle[i] = Variable{"y", i}
+	}
+	for i := range m.Rows[0] {
+		m.TopTitle[i] = Variable{"x", i}
+	}
 }
 
 func (m *Matrix) Print() {

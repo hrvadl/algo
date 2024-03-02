@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hrvadl/algo/internal/cli/parse"
 	"github.com/hrvadl/algo/internal/matrix"
 )
 
@@ -40,4 +41,38 @@ func GetMatrix(rows, columns int) (matrix.Matrix, error) {
 	}
 
 	return m, nil
+}
+
+func GetNegativeRowFromInequation() (matrix.Row, error) {
+	inequality, err := GetRowFromInequation()
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(inequality)-1; i++ {
+		inequality[i] /= -1
+	}
+
+	return inequality, nil
+}
+
+func GetRowFromInequation() (matrix.Row, error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	return parse.InequationFromString(scanner.Text())
+}
+
+func GetRowFromOneSide() (matrix.Row, error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	return parse.NewEvaluator(scanner.Text()).EvaluateFromString()
+}
+
+func GetFunctionRow() (matrix.Row, error) {
+	r, err := GetRowFromOneSide()
+	if err != nil {
+		return nil, err
+	}
+
+	return append(r, 0), nil
 }

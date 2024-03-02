@@ -93,7 +93,7 @@ func TestInvertMatrix(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			actual, _ := tt.m.Invert()
-			if actual := actual.Round(); !reflect.DeepEqual(actual, tt.expected) {
+			if actual := actual.Round(); !reflect.DeepEqual(actual.Rows, tt.expected.Rows) {
 				t.Errorf("expected %v, got %v", tt.expected, actual)
 			}
 		})
@@ -129,7 +129,7 @@ func TestJordanElimination(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			actual, _ := tt.m.JordanEliminate(0, 0)
-			if actual := actual.Round(); !reflect.DeepEqual(actual, tt.expected) {
+			if actual := actual.Round(); !reflect.DeepEqual(actual.Rows, tt.expected.Rows) {
 				t.Errorf("expected %v, got %v", tt.expected, actual)
 			}
 		})
@@ -171,7 +171,7 @@ func TestJordanEliminationModified(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			actual, _ := tt.m.JordanEliminateModified(tt.col, tt.row)
-			if actual := actual.Round(); !reflect.DeepEqual(actual, tt.expected) {
+			if actual := actual.Round(); !reflect.DeepEqual(actual.Rows, tt.expected.Rows) {
 				t.Errorf("expected %v, got %v", tt.expected, actual)
 			}
 		})

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hrvadl/algo/internal/equations"
+	"github.com/hrvadl/algo/internal/inequations"
 	"github.com/hrvadl/algo/internal/matrix"
 	"github.com/hrvadl/algo/pkg/tm"
 )
@@ -34,6 +36,8 @@ func Start() {
 			tm.Clear()
 		case SolveLinearEquationOption:
 			HandleSolveLinearEquation()
+		case SolveLinearInequationOption:
+			HandleSolveLinearInequation()
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -108,6 +112,54 @@ func HandleSolveLinearEquation() {
 
 	fmt.Println("\nThe result of solving equation: ")
 	fmt.Printf("%v\n", res)
+}
+
+func HandleSolveLinearInequation() {
+	fmt.Printf("\nInput Z: \n")
+	z, err := GetFunctionRow()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nInput amount of inequation limitations: \n")
+	n, err := ReadPositiveInt()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	m := matrix.Matrix{
+		Rows: make([]matrix.Row, 0, n+1),
+	}
+
+	for range n {
+		fmt.Printf("\nInput the inequation: \n")
+		inequality, err := GetNegativeRowFromInequation()
+		if err != nil {
+			PrintError(err)
+			return
+		}
+
+		if len(inequality) != len(z) {
+			PrintError(errors.New("rows should have the same size"))
+			return
+		}
+
+		m.Rows = append(m.Rows, inequality)
+	}
+
+	m.Rows = append(m.Rows, z)
+	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
+	m.Print()
+
+	sol, err := inequations.SolveWithOptimalSolution(m)
+	if err != nil {
+		PrintError(errors.New("rows should have the same size"))
+		return
+	}
+
+	fmt.Printf("\nYour solution: \n%v\n", sol)
 }
 
 func HandleGetMatrix() (matrix.Matrix, error) {
