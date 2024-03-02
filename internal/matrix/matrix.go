@@ -243,6 +243,38 @@ func (m *Matrix) FirstNegativeInRow(row int) (col int, err error) {
 	return 0, fmt.Errorf("no negative numbers found in the row %v", row)
 }
 
+func (m *Matrix) FindMinPositiveFor(col int) (row int, err error) {
+	min := 0.
+	row = -1
+	lastCol := len(m.Rows[0]) - 1
+
+	for j := 0; j < len(m.Rows)-1; j++ {
+		if m.Rows[j][col] == 0 {
+			continue
+		}
+
+		res := m.Rows[j][lastCol] / m.Rows[j][col]
+		if res < 0 {
+			continue
+		}
+
+		if res == 0 && m.Rows[j][col] < 0 {
+			continue
+		}
+
+		if (min == 0 && row == -1) || min > res {
+			min = res
+			row = j
+		}
+	}
+
+	if row == -1 {
+		return 0, errors.New("cannot find element to jordan eliminate")
+	}
+
+	return row, nil
+}
+
 func (m *Matrix) SetSwapped(col, row int) {
 	if m.LeftTitle == nil || m.TopTitle == nil {
 		m.fillTitleMaps()
