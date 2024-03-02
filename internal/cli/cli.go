@@ -153,14 +153,60 @@ func HandleSolveLinearInequation() {
 	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
 	m.Print()
 
-	sol, err := inequations.FindMaxWithOptimalSolution(m)
+	fmt.Println("Do you want to find min or max?")
+	minMax, err := ReadWord()
 	if err != nil {
 		PrintError(err)
 		return
 	}
 
-	fmt.Printf("\nYour support solution: \n%v\n", sol.Support)
-	fmt.Printf("\nYour optimal solution: \n%v\n", sol.Optimal)
+	if minMax == "max" {
+		HandleGetMaxWithOptimalSolution(m)
+		return
+	}
+
+	HandleGetMinWithOptimalSolution(m)
+}
+
+func HandleGetMinWithOptimalSolution(m matrix.Matrix) {
+	fmt.Printf("\nFinding the support solution...\n")
+	support, solved, err := inequations.FindMaxWithSupportSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+	m = *solved
+
+	optimal, err := inequations.FindMinWithOptimalSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support solution: \n%v\n", support)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution)
+	fmt.Printf("\nYour min: \n%v\n", optimal.Min)
+}
+
+func HandleGetMaxWithOptimalSolution(m matrix.Matrix) {
+	fmt.Printf("\nFinding the support solution...\n")
+	support, solved, err := inequations.FindMaxWithSupportSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	m = *solved
+
+	optimal, err := inequations.FindMaxWithOptimalSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support solution: \n%v\n", support)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution)
+	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
 }
 
 func HandleGetMatrix() (matrix.Matrix, error) {

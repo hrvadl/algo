@@ -7,114 +7,154 @@ import (
 	"github.com/hrvadl/algo/internal/matrix"
 )
 
-type Solution struct {
-	Optimal []float64
-	Support []float64
+type MaxSolution struct {
+	Solution []float64
+	Max      float64
 }
 
-func FindMaxWithOptimalSolution(m matrix.Matrix) (*Solution, error) {
-	fmt.Printf("\nFinding the support solution...\n")
-	support, solved, err := FindMaxWithSupportSolution(m)
+type MinSolution struct {
+	Solution []float64
+	Min      float64
+}
+
+func FindMinWithOptimalSolution(m matrix.Matrix) (*MinSolution, error) {
+	sol, err := FindMaxWithOptimalSolution(m)
 	if err != nil {
 		return nil, err
 	}
 
-	m = *solved
-	lastCol := len(solved.Rows[0]) - 1
-	lastRow := len(solved.Rows) - 1
+	return &MinSolution{
+		Solution: sol.Solution,
+		Min:      -1 * sol.Max,
+	}, nil
+}
+
+func FindMinWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
+	lastRow := len(m.Rows) - 1
+	for i := range m.Rows[lastRow] {
+		m.Rows[lastRow][i] /= -1
+	}
+
+	return FindMaxWithSupportSolution(m)
+}
+
+func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
+	lastCol := len(m.Rows[0]) - 1
+	lastRow := len(m.Rows) - 1
 	res := make([]float64, lastCol)
+	col := -1
 
 	fmt.Printf("\nFinding the optimal solution...\n")
-	for i, j := 0, 0; i < len(m.Rows[lastRow])-1; i++ {
+	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
 		if m.Rows[lastRow][i] < 0 {
-			j++
-			col := i
-
-			row, err := findRowToEliminate(m, col)
-			if err != nil {
-				return nil, err
-			}
-
-			m, err = m.JordanEliminateModified(col, row)
-			if err != nil {
-				return nil, err
-			}
-
-			fmt.Printf("\nStep #%v. Matrix: \n\n", j)
-			rm := m.Round()
-			rm.Print()
+			col = i
+			break
 		}
 	}
 
-	for row, variable := range m.LeftTitle {
-		if variable.IsX() {
-			res[variable.Index] = m.Rows[row][lastCol]
+	if col == -1 {
+		for row, variable := range m.LeftTitle {
+			if variable.IsX() {
+				res[variable.Index] = m.Rows[row][lastCol]
+			}
 		}
+
+		return &MaxSolution{
+			Solution: res,
+			Max:      m.Rows[lastRow][lastCol],
+		}, nil
 	}
 
-	return &Solution{
-		Optimal: res,
-		Support: support,
-	}, nil
+	row, err := findRowToEliminate(m, col)
+	if err != nil {
+		return nil, err
+	}
+
+	m, err = m.JordanEliminateModified(col, row)
+	if err != nil {
+		return nil, err
+	}
+
+	rm := m.Round()
+	rm.Print()
+
+	return FindMaxWithOptimalSolution(m)
 }
 
 func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
 	lastCol := len(m.Rows[0]) - 1
 	res := make([]float64, lastCol)
+	negativeInLastCol := -1
 
-	for i, j := 0, 0; i < len(m.Rows)-1; i++ {
+	for i := 0; i < len(m.Rows)-1; i++ {
 		if m.Rows[i][lastCol] < 0 {
-			j++
-			col, err := m.FirstNegativeInRow(i)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			if col == lastCol {
-				return nil, nil, fmt.Errorf("no negative numbers are found in the row %v", i)
-			}
-
-			row, err := findRowToEliminate(m, col)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			m, err = m.JordanEliminateModified(col, row)
-			if err != nil {
-				return nil, nil, err
-			}
-			fmt.Printf("\nStep #%v. Matrix: \n\n", j)
-			rm := m.Round()
-			rm.Print()
+			negativeInLastCol = i
+			break
 		}
 	}
 
-	for row, variable := range m.LeftTitle {
-		if variable.IsX() {
-			res[variable.Index] = m.Rows[row][lastCol]
+	if negativeInLastCol == -1 {
+		for row, variable := range m.LeftTitle {
+			if variable.IsX() {
+				res[variable.Index] = m.Rows[row][lastCol]
+			}
 		}
+		return res, &m, nil
 	}
 
-	return res, &m, nil
+	col, err := m.FirstNegativeInRow(negativeInLastCol)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if col == lastCol {
+		return nil, nil, fmt.Errorf(
+			"no negative numbers are found in the row %v",
+			negativeInLastCol,
+		)
+	}
+
+	row, err := findRowToEliminate(m, col)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	m, err = m.JordanEliminateModified(col, row)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rm := m.Round()
+	rm.Print()
+	return FindMaxWithSupportSolution(m)
 }
 
 func findRowToEliminate(m matrix.Matrix, col int) (row int, err error) {
-	var min float64
+	min := 0.
+	row = -1
 	lastCol := len(m.Rows[0]) - 1
 	for j := 0; j < len(m.Rows)-1; j++ {
-		res := m.Rows[j][lastCol] / m.Rows[j][col]
-		if res <= 0 {
+		if m.Rows[j][col] == 0 {
 			continue
 		}
 
-		if min == 0 || min > res {
+		res := m.Rows[j][lastCol] / m.Rows[j][col]
+		if res < 0 {
+			continue
+		}
+
+		if res == 0 && m.Rows[j][col] < 0 {
+			continue
+		}
+
+		if (min == 0 && row == -1) || min > res {
 			min = res
 			row = j
 		}
 	}
 
-	if min == 0 {
-		return 0, errors.New("cannot find row to jordan eliminate")
+	if row == -1 {
+		return 0, errors.New("cannot find element to jordan eliminate")
 	}
 
 	return row, nil

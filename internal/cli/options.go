@@ -45,9 +45,17 @@ func ReadPositiveInt() (int, error) {
 	return n, nil
 }
 
+func ReadWord() (string, error) {
+	var str string
+	if _, err := fmt.Scanln(&str); err != nil {
+		return "", errors.New("invalid input")
+	}
+	return str, nil
+}
+
 func ChooseOption() (Option, error) {
-	var option string
-	if _, err := fmt.Scanln(&option); err != nil {
+	option, err := ReadWord()
+	if err != nil {
 		return "", errors.New("invalid input")
 	}
 
