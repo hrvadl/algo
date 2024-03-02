@@ -135,18 +135,24 @@ func HandleSolveLinearInequation() {
 
 	for range n {
 		fmt.Printf("\nInput the inequation: \n")
-		inequality, err := GetNegativeRowFromInequation()
+		expression, isEquation, err := GetNegativeRowFromExpression()
 		if err != nil {
 			PrintError(err)
 			return
 		}
 
-		if len(inequality) != len(z) {
+		if len(expression) != len(z) {
 			PrintError(errors.New("rows should have the same size"))
 			return
 		}
 
-		m.Rows = append(m.Rows, inequality)
+		if isEquation {
+			m.LeftTitle[n] = matrix.Variable{Name: "0"}
+		} else {
+			m.LeftTitle[n] = matrix.Variable{Name: "x", Index: n}
+		}
+
+		m.Rows = append(m.Rows, expression)
 	}
 
 	m.Rows = append(m.Rows, z)
@@ -169,6 +175,12 @@ func HandleSolveLinearInequation() {
 }
 
 func HandleGetMinWithOptimalSolution(m matrix.Matrix) {
+	m, err := m.DeleteZeros()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
 	fmt.Printf("\nFinding the support solution...\n")
 	support, solved, err := inequations.FindMaxWithSupportSolution(m)
 	if err != nil {
@@ -189,6 +201,12 @@ func HandleGetMinWithOptimalSolution(m matrix.Matrix) {
 }
 
 func HandleGetMaxWithOptimalSolution(m matrix.Matrix) {
+	m, err := m.DeleteZeros()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
 	fmt.Printf("\nFinding the support solution...\n")
 	support, solved, err := inequations.FindMaxWithSupportSolution(m)
 	if err != nil {

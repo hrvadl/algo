@@ -41,7 +41,6 @@ func TestFindMaxWithSupportSolution(t *testing.T) {
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 			actual, _, _ := FindMaxWithSupportSolution(tt.m)
 			if !slices.Equal(actual, tt.expected) {
 				t.Fatalf("Expected %v, \ngot %v", tt.expected, actual)

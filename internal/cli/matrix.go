@@ -43,38 +43,23 @@ func GetMatrix(rows, columns int) (matrix.Matrix, error) {
 	return m, nil
 }
 
-func GetNegativeRowFromInequation() (matrix.Row, error) {
-	inequality, err := GetRowFromInequation()
+func GetNegativeRowFromExpression() (matrix.Row, bool, error) {
+	inequality, isEquation, err := GetRowFromExpression()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	for i := 0; i < len(inequality)-1; i++ {
 		inequality[i] /= -1
 	}
 
-	return inequality, nil
+	return inequality, isEquation, nil
 }
 
-func GetRowFromInequation() (matrix.Row, error) {
+func GetRowFromExpression() (matrix.Row, bool, error) {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
-	return parse.InequationFromString(scanner.Text())
-}
-
-func GetRowFromOneSide() (matrix.Row, error) {
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	return parse.NewEvaluator(scanner.Text()).EvaluateFromString()
-}
-
-func GetFunctionRow() (matrix.Row, error) {
-	r, err := GetRowFromOneSide()
-	if err != nil {
-		return nil, err
-	}
-
-	return append(r, 0), nil
+	return parse.EquationOrInequationFromString(scanner.Text())
 }
 
 func GetNegativeFunctionRow() (matrix.Row, error) {
@@ -87,4 +72,19 @@ func GetNegativeFunctionRow() (matrix.Row, error) {
 	}
 
 	return r, nil
+}
+
+func GetFunctionRow() (matrix.Row, error) {
+	r, err := GetRowFromOneSide()
+	if err != nil {
+		return nil, err
+	}
+
+	return append(r, 0), nil
+}
+
+func GetRowFromOneSide() (matrix.Row, error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	return parse.NewEvaluator(scanner.Text()).EvaluateFromString()
 }

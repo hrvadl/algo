@@ -248,6 +248,10 @@ func (m *Matrix) DeleteRow(row int) (Matrix, error) {
 		return Matrix{}, err
 	}
 
+	if !m.TopTitle[col].IsZero() {
+		return newM, nil
+	}
+
 	for i, row := range newM.Rows {
 		for j := range row {
 			if j <= col {
@@ -391,16 +395,41 @@ func (m *Matrix) fillTitleMaps() {
 	if m.LeftTitle == nil {
 		m.LeftTitle = make(map[int]Variable)
 		for i := range m.Rows {
-			m.LeftTitle[i] = Variable{"y", i}
+			if i == len(m.Rows)-1 {
+				m.LeftTitle[i] = Variable{"1", 0}
+			} else {
+				m.LeftTitle[i] = Variable{"y", i}
+			}
 		}
 	}
 
 	if m.TopTitle == nil {
 		m.TopTitle = make(map[int]Variable)
 		for i := range m.Rows[0] {
-			m.TopTitle[i] = Variable{"x", i}
+			if i == len(m.Rows[0])-1 {
+				m.TopTitle[i] = Variable{"z", i}
+			} else {
+				m.TopTitle[i] = Variable{"x", i}
+			}
 		}
 	}
+}
+
+func (m *Matrix) GetXCount() int {
+	var total int
+	for _, variable := range m.LeftTitle {
+		if variable.IsX() {
+			total++
+		}
+	}
+
+	for _, variable := range m.TopTitle {
+		if variable.IsX() {
+			total++
+		}
+	}
+
+	return total
 }
 
 func (m *Matrix) Print() {

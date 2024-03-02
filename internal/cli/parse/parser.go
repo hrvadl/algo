@@ -7,6 +7,47 @@ import (
 	"github.com/hrvadl/algo/internal/matrix"
 )
 
+func EquationOrInequationFromString(str string) (matrix.Row, bool, error) {
+	if strings.ContainsRune(str, '<') || strings.ContainsRune(str, '>') {
+		r, err := InequationFromString(str)
+		return r, false, err
+	}
+	r, err := EquationFromString(str)
+	return r, true, err
+}
+
+func EquationFromString(str string) (matrix.Row, error) {
+	length := len(strings.FieldsFunc(str, func(r rune) bool {
+		return r == '-' || r == '+'
+	}))
+
+	if length == 0 {
+		return nil, errors.New("invalid expression")
+	}
+
+	split := strings.Split(str, "=")
+
+	if len(split) != 2 {
+		return nil, errors.New("invalid expression")
+	}
+
+	r, err := NewEvaluator(split[1]).EvaluateFromString()
+	if err != nil {
+		return nil, err
+	}
+
+	l, err := NewEvaluator(split[0]).EvaluateFromString()
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range l {
+		l[i] *= -1
+	}
+
+	return append(l, r...), nil
+}
+
 func InequationFromString(str string) (matrix.Row, error) {
 	length := len(strings.FieldsFunc(str, func(r rune) bool {
 		return r == '-' || r == '+'
