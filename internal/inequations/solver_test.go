@@ -25,6 +25,18 @@ func TestSolveWithSupportSolution(t *testing.T) {
 			},
 			expected: matrix.Row{2, 0, 0, 0, 0},
 		},
+		{
+			name: "Should solve inequation correctly",
+			m: matrix.Matrix{
+				Rows: []matrix.Row{
+					{1, 1, -1, -2, 6},
+					{-1, -1, -1, 1, -5},
+					{2, -1, 3, 4, 10},
+					{-1, -2, 1, 1, 0},
+				},
+			},
+			expected: matrix.Row{5, 0, 0, 0},
+		},
 	}
 
 	for _, tt := range tc {
@@ -55,6 +67,18 @@ func TestSolveWithOptimalSolution(t *testing.T) {
 				},
 			},
 			expected: matrix.Row{3, 0, 0, 0, 0},
+		},
+		{
+			name: "Should solve inequation correctly",
+			m: matrix.Matrix{
+				Rows: []matrix.Row{
+					{1, 1, -1, -2, 6},
+					{-1, -1, -1, 1, -5},
+					{2, -1, 3, 4, 10},
+					{-1, -2, 1, 1, 0},
+				},
+			},
+			expected: matrix.Row{0, 22, 0, 8},
 		},
 	}
 
