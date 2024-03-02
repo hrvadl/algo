@@ -14,7 +14,7 @@ import (
 	"github.com/hrvadl/algo/pkg/tm"
 )
 
-const GracefulShutdownTime = 2 * time.Second
+const GracefulShutdownTime = 1 * time.Second
 
 func Start() {
 	for {
@@ -116,7 +116,7 @@ func HandleSolveLinearEquation() {
 
 func HandleSolveLinearInequation() {
 	fmt.Printf("\nInput Z: \n")
-	z, err := GetFunctionRow()
+	z, err := GetNegativeFunctionRow()
 	if err != nil {
 		PrintError(err)
 		return
@@ -153,13 +153,14 @@ func HandleSolveLinearInequation() {
 	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
 	m.Print()
 
-	sol, err := inequations.SolveWithOptimalSolution(m)
+	sol, err := inequations.FindMaxWithOptimalSolution(m)
 	if err != nil {
-		PrintError(errors.New("rows should have the same size"))
+		PrintError(err)
 		return
 	}
 
-	fmt.Printf("\nYour solution: \n%v\n", sol)
+	fmt.Printf("\nYour support solution: \n%v\n", sol.Support)
+	fmt.Printf("\nYour optimal solution: \n%v\n", sol.Optimal)
 }
 
 func HandleGetMatrix() (matrix.Matrix, error) {

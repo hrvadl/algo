@@ -76,3 +76,15 @@ func GetFunctionRow() (matrix.Row, error) {
 
 	return append(r, 0), nil
 }
+
+func GetNegativeFunctionRow() (matrix.Row, error) {
+	r, err := GetFunctionRow()
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(r)-1; i++ {
+		r[i] /= -1
+	}
+
+	return r, nil
+}

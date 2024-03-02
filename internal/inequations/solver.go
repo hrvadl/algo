@@ -12,9 +12,9 @@ type Solution struct {
 	Support []float64
 }
 
-func SolveWithOptimalSolution(m matrix.Matrix) (*Solution, error) {
+func FindMaxWithOptimalSolution(m matrix.Matrix) (*Solution, error) {
 	fmt.Printf("\nFinding the support solution...\n")
-	support, solved, err := solveWithSupportSolution(m)
+	support, solved, err := FindMaxWithSupportSolution(m)
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,9 @@ func SolveWithOptimalSolution(m matrix.Matrix) (*Solution, error) {
 	res := make([]float64, lastCol)
 
 	fmt.Printf("\nFinding the optimal solution...\n")
-	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
+	for i, j := 0, 0; i < len(m.Rows[lastRow])-1; i++ {
 		if m.Rows[lastRow][i] < 0 {
+			j++
 			col := i
 
 			row, err := findRowToEliminate(m, col)
@@ -38,8 +39,10 @@ func SolveWithOptimalSolution(m matrix.Matrix) (*Solution, error) {
 			if err != nil {
 				return nil, err
 			}
-			fmt.Printf("Step #%v. Matrix: \n\n", i+1)
-			m.Print()
+
+			fmt.Printf("\nStep #%v. Matrix: \n\n", j)
+			rm := m.Round()
+			rm.Print()
 		}
 	}
 
@@ -55,12 +58,13 @@ func SolveWithOptimalSolution(m matrix.Matrix) (*Solution, error) {
 	}, nil
 }
 
-func solveWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
+func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
 	lastCol := len(m.Rows[0]) - 1
 	res := make([]float64, lastCol)
 
-	for i := 0; i < len(m.Rows)-1; i++ {
+	for i, j := 0, 0; i < len(m.Rows)-1; i++ {
 		if m.Rows[i][lastCol] < 0 {
+			j++
 			col, err := m.FirstNegativeInRow(i)
 			if err != nil {
 				return nil, nil, err
@@ -79,8 +83,9 @@ func solveWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error
 			if err != nil {
 				return nil, nil, err
 			}
-			fmt.Printf("Step #%v. Matrix: \n\n", i+1)
-			m.Print()
+			fmt.Printf("\nStep #%v. Matrix: \n\n", j)
+			rm := m.Round()
+			rm.Print()
 		}
 	}
 
