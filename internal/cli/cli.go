@@ -168,6 +168,8 @@ func HandleSolveLinearInequation() {
 		return
 	}
 
+	m.FillTopTitle()
+
 	if minMax == "max" {
 		HandleGetMaxWithOptimalSolution(m)
 		return

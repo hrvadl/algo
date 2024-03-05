@@ -385,17 +385,17 @@ func (m *Matrix) FindMinPositiveFor(col int) (row int, err error) {
 
 func (m *Matrix) SetSwapped(col, row int) {
 	if len(m.LeftTitle) == 0 {
-		m.fillLeftTitle()
+		m.FillLeftTitle()
 	}
 
 	if len(m.TopTitle) == 0 {
-		m.fillTopTitle()
+		m.FillTopTitle()
 	}
 
 	m.TopTitle[col], m.LeftTitle[row] = m.LeftTitle[row], m.TopTitle[col]
 }
 
-func (m *Matrix) fillLeftTitle() {
+func (m *Matrix) FillLeftTitle() {
 	m.LeftTitle = make(map[int]Variable)
 	for i := range m.Rows {
 		if i == len(m.Rows)-1 {
@@ -406,7 +406,7 @@ func (m *Matrix) fillLeftTitle() {
 	}
 }
 
-func (m *Matrix) fillTopTitle() {
+func (m *Matrix) FillTopTitle() {
 	m.TopTitle = make(map[int]Variable)
 	for i := range m.Rows[0] {
 		if i == len(m.Rows[0])-1 {
