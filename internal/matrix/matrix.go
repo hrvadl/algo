@@ -384,33 +384,35 @@ func (m *Matrix) FindMinPositiveFor(col int) (row int, err error) {
 }
 
 func (m *Matrix) SetSwapped(col, row int) {
-	if m.LeftTitle == nil || m.TopTitle == nil {
-		m.fillTitleMaps()
+	if len(m.LeftTitle) == 0 {
+		m.fillLeftTitle()
+	}
+
+	if len(m.TopTitle) == 0 {
+		m.fillTopTitle()
 	}
 
 	m.TopTitle[col], m.LeftTitle[row] = m.LeftTitle[row], m.TopTitle[col]
 }
 
-func (m *Matrix) fillTitleMaps() {
-	if m.LeftTitle == nil {
-		m.LeftTitle = make(map[int]Variable)
-		for i := range m.Rows {
-			if i == len(m.Rows)-1 {
-				m.LeftTitle[i] = Variable{"1", 0}
-			} else {
-				m.LeftTitle[i] = Variable{"y", i}
-			}
+func (m *Matrix) fillLeftTitle() {
+	m.LeftTitle = make(map[int]Variable)
+	for i := range m.Rows {
+		if i == len(m.Rows)-1 {
+			m.LeftTitle[i] = Variable{"1", 0}
+		} else {
+			m.LeftTitle[i] = Variable{"y", i}
 		}
 	}
+}
 
-	if m.TopTitle == nil {
-		m.TopTitle = make(map[int]Variable)
-		for i := range m.Rows[0] {
-			if i == len(m.Rows[0])-1 {
-				m.TopTitle[i] = Variable{"z", i}
-			} else {
-				m.TopTitle[i] = Variable{"x", i}
-			}
+func (m *Matrix) fillTopTitle() {
+	m.TopTitle = make(map[int]Variable)
+	for i := range m.Rows[0] {
+		if i == len(m.Rows[0])-1 {
+			m.TopTitle[i] = Variable{"z", i}
+		} else {
+			m.TopTitle[i] = Variable{"x", i}
 		}
 	}
 }

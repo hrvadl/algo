@@ -130,29 +130,31 @@ func HandleSolveLinearInequation() {
 	}
 
 	m := matrix.Matrix{
-		Rows: make([]matrix.Row, 0, n+1),
+		Rows:      make([]matrix.Row, 0, n+1),
+		LeftTitle: make(map[int]matrix.Variable),
+		TopTitle:  make(map[int]matrix.Variable),
 	}
 
-	for range n {
+	for i := range n {
 		fmt.Printf("\nInput the inequation: \n")
-		expression, isEquation, err := GetNegativeRowFromExpression()
+		row, isEquation, err := GetNegativeRowFromExpression()
 		if err != nil {
 			PrintError(err)
 			return
 		}
 
-		if len(expression) != len(z) {
+		if len(row) != len(z) {
 			PrintError(errors.New("rows should have the same size"))
 			return
 		}
 
 		if isEquation {
-			m.LeftTitle[n] = matrix.Variable{Name: "0"}
+			m.LeftTitle[i] = matrix.Variable{Name: "0"}
 		} else {
-			m.LeftTitle[n] = matrix.Variable{Name: "x", Index: n}
+			m.LeftTitle[i] = matrix.Variable{Name: "y", Index: i}
 		}
 
-		m.Rows = append(m.Rows, expression)
+		m.Rows = append(m.Rows, row)
 	}
 
 	m.Rows = append(m.Rows, z)
