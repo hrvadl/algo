@@ -17,6 +17,10 @@ func (v Variable) IsX() bool {
 	return v.Name == "x"
 }
 
+func (v Variable) IsZ() bool {
+	return v.Name == "z"
+}
+
 func (v Variable) IsZero() bool {
 	return v.Name == "0"
 }
@@ -432,6 +436,51 @@ func (m *Matrix) GetXCount() int {
 	}
 
 	return total
+}
+
+func (m *Matrix) IntegerLimitationFor(row int) Row {
+	res := make(Row, 0, len(m.Rows[row]))
+
+	for _, el := range m.Rows[row] {
+		integer, fraction := math.Modf(el)
+		if fraction == 0 {
+			res = append(res, el)
+			continue
+		}
+
+		if integer < 0 || fraction < 0 {
+			integer--
+		}
+
+		res = append(res, RoundTo(el-integer, 2))
+	}
+
+	return res
+}
+
+func (m *Matrix) NegativeRowFor(row Row) Row {
+	for i := range row {
+		row[i] /= -1
+	}
+	return row
+}
+
+func (m *Matrix) InsertRow(row Row) Matrix {
+	newM := m.Copy()
+	lastCol := len(newM.Rows) - 1
+	old := newM.Rows[lastCol]
+	newM.Rows = append(newM.Rows, old)
+	newM.Rows[lastCol] = row
+
+	for row, variable := range newM.LeftTitle {
+		if variable.IsZ() {
+			newM.LeftTitle[row+1] = variable
+			newM.LeftTitle[row] = Variable{Name: "s"}
+			break
+		}
+	}
+
+	return newM
 }
 
 func (m *Matrix) Print() {

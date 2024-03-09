@@ -2,6 +2,7 @@ package matrix
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -363,6 +364,144 @@ func TestDeleteZeros(t *testing.T) {
 
 			if !reflect.DeepEqual(tt.expected, actual) {
 				t.Fatalf("expected: %v\ngot: %v", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestIntegerLimitationForZeros(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		row      int
+		expected Row
+	}{
+		{
+			name: "Should calculate integer limitation correctly",
+			m: Matrix{
+				Rows: []Row{
+					{-2, -1, 0, 2, 4},
+					{-1, 3, -2, 3, 5},
+					{0.5, -4.5, 1.3, -0.5, 1},
+					{-1, -1, 1, -2, 2},
+				},
+				LeftTitle: map[int]Variable{
+					0: {Name: "0"},
+					1: {Name: "0"},
+					2: {Name: "x", Index: 1},
+					3: {Name: "Z"},
+				},
+				TopTitle: map[int]Variable{
+					0: {Name: "x", Index: 0},
+					1: {Name: "x", Index: 2},
+					2: {Name: "x", Index: 3},
+					3: {Name: "x", Index: 4},
+					4: {Name: "1"},
+				},
+			},
+			row:      2,
+			expected: Row{0.5, 0.5, 0.3, 0.5, 1},
+		},
+		{
+			name: "Should calculate integer limitation correctly",
+			m: Matrix{
+				Rows: []Row{
+					{-2, -1, 0, 2, 4},
+					{-1, 3, -2, 3, 5},
+					{0.5, -4.5, 1.3, -0.5, 1},
+					{-1, -1, 1, -2, 2},
+				},
+				LeftTitle: map[int]Variable{
+					0: {Name: "0"},
+					1: {Name: "0"},
+					2: {Name: "x", Index: 1},
+					3: {Name: "Z"},
+				},
+				TopTitle: map[int]Variable{
+					0: {Name: "x", Index: 0},
+					1: {Name: "x", Index: 2},
+					2: {Name: "x", Index: 3},
+					3: {Name: "x", Index: 4},
+					4: {Name: "1"},
+				},
+			},
+			row:      0,
+			expected: Row{-2, -1, 0, 2, 4},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if actual := tt.m.IntegerLimitationFor(tt.row); !slices.Equal(actual, tt.expected) {
+				t.Fatalf("expected %v\ngot %v", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestInsertRow(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		row      Row
+		expected Matrix
+	}{
+		{
+			name: "Should calculate integer limitation correctly",
+			m: Matrix{
+				Rows: []Row{
+					{-2, -1, 0, 2, 4},
+					{-1, 3, -2, 3, 5},
+					{0.5, -4.5, 1.3, -0.5, 1},
+					{-1, -1, 1, -2, 2},
+				},
+				LeftTitle: map[int]Variable{
+					0: {Name: "0"},
+					1: {Name: "0"},
+					2: {Name: "x", Index: 1},
+					3: {Name: "z"},
+				},
+				TopTitle: map[int]Variable{
+					0: {Name: "x", Index: 0},
+					1: {Name: "x", Index: 2},
+					2: {Name: "x", Index: 3},
+					3: {Name: "x", Index: 4},
+					4: {Name: "1"},
+				},
+			},
+			row: Row{1, 2, 3, 4, 5},
+			expected: Matrix{
+				Rows: []Row{
+					{-2, -1, 0, 2, 4},
+					{-1, 3, -2, 3, 5},
+					{0.5, -4.5, 1.3, -0.5, 1},
+					{1, 2, 3, 4, 5},
+					{-1, -1, 1, -2, 2},
+				},
+				LeftTitle: map[int]Variable{
+					0: {Name: "0"},
+					1: {Name: "0"},
+					2: {Name: "x", Index: 1},
+					3: {Name: "s"},
+					4: {Name: "z"},
+				},
+				TopTitle: map[int]Variable{
+					0: {Name: "x", Index: 0},
+					1: {Name: "x", Index: 2},
+					2: {Name: "x", Index: 3},
+					3: {Name: "x", Index: 4},
+					4: {Name: "1"},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if actual := tt.m.InsertRow(tt.row); !reflect.DeepEqual(actual, tt.expected) {
+				t.Fatalf("expected %v\ngot %v", tt.expected, actual)
 			}
 		})
 	}
