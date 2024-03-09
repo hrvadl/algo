@@ -6,16 +6,19 @@ import (
 	"github.com/hrvadl/algo/internal/matrix"
 )
 
+type Solution struct {
+	Matrix matrix.Matrix
+	Result []float64
+}
+
 type MaxSolution struct {
-	Matrix   matrix.Matrix
-	Solution []float64
-	Max      float64
+	Solution
+	Max float64
 }
 
 type MinSolution struct {
-	Matrix   matrix.Matrix
-	Solution []float64
-	Min      float64
+	Solution
+	Min float64
 }
 
 func FindMinWithOptimalSolution(m matrix.Matrix) (*MinSolution, error) {
@@ -25,24 +28,36 @@ func FindMinWithOptimalSolution(m matrix.Matrix) (*MinSolution, error) {
 	}
 
 	return &MinSolution{
-		Matrix:   m,
 		Solution: sol.Solution,
 		Min:      -1 * sol.Max,
 	}, nil
 }
 
-func FindMinWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
+func FindMinWithSupportSolution(m matrix.Matrix) (Solution, error) {
 	lastRow := len(m.Rows) - 1
 	for i := range m.Rows[lastRow] {
 		m.Rows[lastRow][i] /= -1
 	}
 
-	return FindMaxWithSupportSolution(m)
+	return FindSupportSolution(m)
 }
 
 func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
+	optimal, err := FindOptimalSolution(m)
+	if err != nil {
+		return nil, err
+	}
+
+	lastCol := len(optimal.Matrix.Rows[0]) - 1
+	lastRow := len(optimal.Matrix.Rows) - 1
+	return &MaxSolution{
+		Solution: *optimal,
+		Max:      optimal.Matrix.Rows[lastRow][lastCol],
+	}, nil
+}
+
+func FindOptimalSolution(m matrix.Matrix) (*Solution, error) {
 	lastCol := len(m.Rows[0]) - 1
-	lastRow := len(m.Rows) - 1
 	res := make([]float64, m.GetXCount())
 
 	col, err := m.FirstNegativeColumnInLastRow()
@@ -53,10 +68,9 @@ func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
 			}
 		}
 
-		return &MaxSolution{
-			Matrix:   m,
-			Solution: res,
-			Max:      m.Rows[lastRow][lastCol],
+		return &Solution{
+			Matrix: m,
+			Result: res,
 		}, nil
 	}
 
@@ -74,10 +88,10 @@ func FindMaxWithOptimalSolution(m matrix.Matrix) (*MaxSolution, error) {
 	rm := m.Round()
 	rm.Print()
 
-	return FindMaxWithOptimalSolution(m)
+	return FindOptimalSolution(m)
 }
 
-func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, error) {
+func FindSupportSolution(m matrix.Matrix) (Solution, error) {
 	lastCol := len(m.Rows[0]) - 1
 	res := make([]float64, m.GetXCount())
 
@@ -88,26 +102,26 @@ func FindMaxWithSupportSolution(m matrix.Matrix) ([]float64, *matrix.Matrix, err
 				res[variable.Index] = m.Rows[row][lastCol]
 			}
 		}
-		return res, &m, nil
+		return Solution{Matrix: m, Result: res}, nil
 	}
 
 	col, err := m.FirstNegativeInRowExceptLastColumn(negativeInLastCol)
 	if err != nil {
-		return nil, nil, err
+		return Solution{}, err
 	}
 
 	row, err := m.FindMinPositiveFor(col)
 	if err != nil {
-		return nil, nil, err
+		return Solution{}, err
 	}
 
 	m, err = m.JordanEliminateModified(col, row)
 	if err != nil {
-		return nil, nil, err
+		return Solution{}, err
 	}
 
 	fmt.Printf("\nElement col: %v row: %v, Matrix:\n\n", col, row)
 	rm := m.Round()
 	rm.Print()
-	return FindMaxWithSupportSolution(m)
+	return FindSupportSolution(m)
 }

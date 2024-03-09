@@ -43,8 +43,8 @@ func TestFindMaxWithSupportSolution(t *testing.T) {
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			actual, _, _ := FindMaxWithSupportSolution(tt.m)
-			if !slices.Equal(actual, tt.expected) {
+			actual, _ := FindSupportSolution(tt.m)
+			if !slices.Equal(actual.Result, tt.expected) {
 				t.Fatalf("Expected %v, \ngot %v", tt.expected, actual)
 			}
 		})
@@ -88,17 +88,17 @@ func TestFindMaxWithOptimalSolution(t *testing.T) {
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
-			_, m, err := FindMaxWithSupportSolution(tt.m)
+			support, err := FindSupportSolution(tt.m)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			actual, err := FindMaxWithOptimalSolution(*m)
+			actual, err := FindMaxWithOptimalSolution(support.Matrix)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if !slices.Equal(actual.Solution, tt.expected) {
+			if !slices.Equal(actual.Result, tt.expected) {
 				t.Errorf("Expected %v, \ngot %v", tt.expected, actual.Solution)
 			}
 
@@ -134,18 +134,18 @@ func TestFindMinWithOptimalSolution(t *testing.T) {
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			_, m, err := FindMinWithSupportSolution(tt.m)
+			support, err := FindMinWithSupportSolution(tt.m)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			actual, err := FindMinWithOptimalSolution(*m)
+			actual, err := FindMinWithOptimalSolution(support.Matrix)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if !slices.Equal(actual.Solution, tt.expected) {
-				t.Fatalf("Expected %v, \ngot %v", tt.expected, actual.Solution)
+			if !slices.Equal(actual.Result, tt.expected) {
+				t.Fatalf("Expected %v, \ngot %v", tt.expected, actual.Result)
 			}
 
 			if tt.min != actual.Min {
@@ -222,27 +222,26 @@ func TestHandleGetMinWithOptimalSolution(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, solved, err := FindMaxWithSupportSolution(m)
+			support, err := FindSupportSolution(m)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			m = *solved
-			actual, err := FindMaxWithOptimalSolution(m)
+			optimal, err := FindMaxWithOptimalSolution(support.Matrix)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if !reflect.DeepEqual(actual.Matrix, tt.expected) {
-				t.Fatalf("expected %v,\ngot %v", tt.expected, actual.Matrix)
+			if !reflect.DeepEqual(optimal.Matrix, tt.expected) {
+				t.Fatalf("expected %v,\ngot %v", tt.expected, optimal.Matrix)
 			}
 
-			if !reflect.DeepEqual(actual.Solution, tt.solution) {
-				t.Fatalf("expected %v,\ngot %v", tt.solution, actual.Solution)
+			if !reflect.DeepEqual(optimal.Result, tt.solution) {
+				t.Fatalf("expected %v,\ngot %v", tt.solution, optimal.Result)
 			}
 
-			if actual.Max != tt.max {
-				t.Fatalf("expected %v,\ngot %v", tt.max, actual.Max)
+			if optimal.Max != tt.max {
+				t.Fatalf("expected %v,\ngot %v", tt.max, optimal.Max)
 			}
 		})
 	}
