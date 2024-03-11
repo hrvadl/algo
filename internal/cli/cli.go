@@ -198,8 +198,8 @@ func HandleGetMinWithOptimalSolution(m matrix.Matrix) {
 		return
 	}
 
-	fmt.Printf("\nYour support solution: \n%v\n", support)
-	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution)
+	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution.Result)
 	fmt.Printf("\nYour min: \n%v\n", optimal.Min)
 }
 
@@ -224,7 +224,7 @@ func HandleGetMaxWithOptimalSolution(m matrix.Matrix) {
 	}
 
 	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
-	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution.Result)
 	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
 }
 
