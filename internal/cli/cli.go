@@ -37,7 +37,9 @@ func Start() {
 		case SolveLinearEquationOption:
 			HandleSolveLinearEquation()
 		case SolveLinearInequationOption:
-			HandleSolveLinearInequation()
+			HandleSolveLinearInequation(false)
+		case SolveIntegerLinearInequationOption:
+			HandleSolveLinearInequation(true)
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -114,7 +116,7 @@ func HandleSolveLinearEquation() {
 	fmt.Printf("%v\n", res)
 }
 
-func HandleSolveLinearInequation() {
+func HandleSolveLinearInequation(isInteger bool) {
 	fmt.Printf("\nInput Z: \n")
 	z, err := GetNegativeFunctionRow()
 	if err != nil {
@@ -171,11 +173,58 @@ func HandleSolveLinearInequation() {
 	m.FillTopTitle()
 
 	if minMax == "max" {
+		if isInteger {
+			HandleGetMaxWithIntegerOptimalSolution(m)
+			return
+		}
 		HandleGetMaxWithOptimalSolution(m)
 		return
 	}
 
-	HandleGetMinWithOptimalSolution(m)
+	if minMax == "min" {
+		if isInteger {
+			HandleGetMinWithIntegerOptimalSolution(m)
+			return
+		}
+		HandleGetMinWithOptimalSolution(m)
+		return
+	}
+}
+
+func HandleGetMinWithIntegerOptimalSolution(m matrix.Matrix) {
+	m, err := m.DeleteZeros()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	optimal, support, err := inequations.FindMinIntegerSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support integer solution: \n%v\n", support.Result)
+	fmt.Printf("\nYour optimal integer solution: \n%v\n", optimal.Result)
+	fmt.Printf("\nYour min: \n%v\n", optimal.Min)
+}
+
+func HandleGetMaxWithIntegerOptimalSolution(m matrix.Matrix) {
+	m, err := m.DeleteZeros()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	optimal, support, err := inequations.FindMaxIntegerSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support integer solution: \n%v\n", support.Result)
+	fmt.Printf("\nYour optimal integer solution: \n%v\n", optimal.Result)
+	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
 }
 
 func HandleGetMinWithOptimalSolution(m matrix.Matrix) {

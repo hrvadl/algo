@@ -104,7 +104,7 @@ func TestFindIntegerSolution(t *testing.T) {
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			actual, err := FindIntegerSolution(tt.m)
+			actual, _, err := FindIntegerSolution(tt.m)
 			if err != nil {
 				t.Fatal(err)
 			}
