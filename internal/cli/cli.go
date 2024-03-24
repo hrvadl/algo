@@ -16,6 +16,12 @@ import (
 
 const GracefulShutdownTime = 1 * time.Second
 
+const (
+	CalculateInequationFlag = 1 << iota
+	CalculateIntegerFlag
+	CalculateDoubledFlag
+)
+
 func Start() {
 	for {
 		PrintHelp()
@@ -37,9 +43,9 @@ func Start() {
 		case SolveLinearEquationOption:
 			HandleSolveLinearEquation()
 		case SolveLinearInequationOption:
-			HandleSolveLinearInequation(false)
+			HandleSolveLinearInequation(CalculateInequationFlag)
 		case SolveIntegerLinearInequationOption:
-			HandleSolveLinearInequation(true)
+			HandleSolveLinearInequation(CalculateInequationFlag | CalculateIntegerFlag)
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -116,7 +122,7 @@ func HandleSolveLinearEquation() {
 	fmt.Printf("%v\n", res)
 }
 
-func HandleSolveLinearInequation(isInteger bool) {
+func HandleSolveLinearInequation(flag uint8) {
 	fmt.Printf("\nInput Z: \n")
 	z, err := GetNegativeFunctionRow()
 	if err != nil {
@@ -171,20 +177,32 @@ func HandleSolveLinearInequation(isInteger bool) {
 
 	m.FillTopTitle()
 
-	if minMax == "max" {
-		if isInteger {
+	switch minMax {
+	case "max":
+		if flag&CalculateIntegerFlag != 0 {
 			HandleGetMaxWithIntegerOptimalSolution(m)
 			return
 		}
+
+		if flag&CalculateDoubledFlag != 0 {
+			HandleGetDoubledMaxWithOptimalSolution(m)
+			return
+		}
+
 		HandleGetMaxWithOptimalSolution(m)
 		return
-	}
 
-	if minMax == "min" {
-		if isInteger {
+	case "min":
+		if flag&CalculateIntegerFlag != 0 {
 			HandleGetMinWithIntegerOptimalSolution(m)
 			return
 		}
+
+		if flag&CalculateDoubledFlag != 0 {
+			HandleGetDoubledMinWithOptimalSolution(m)
+			return
+		}
+
 		HandleGetMinWithOptimalSolution(m)
 		return
 	}
@@ -223,6 +241,56 @@ func HandleGetMaxWithIntegerOptimalSolution(m matrix.Matrix) {
 
 	fmt.Printf("\nYour support integer solution: \n%v\n", support.Result)
 	fmt.Printf("\nYour optimal integer solution: \n%v\n", optimal.Result)
+	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
+}
+
+func HandleGetDoubledMinWithOptimalSolution(m matrix.Matrix) {
+	m, err := m.DeleteZeros()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nFinding the support solution...\n")
+	support, err := inequations.FindSupportSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	optimal, err := inequations.FindMinWithOptimalSolution(support.Matrix)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution.Result)
+	fmt.Printf("\nYour min: \n%v\n", optimal.Min)
+}
+
+func HandleGetDoubledMaxWithOptimalSolution(m matrix.Matrix) {
+	m, err := m.DeleteZeros()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nFinding the support solution...\n")
+	support, err := inequations.FindSupportSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	optimal, err := inequations.FindMaxWithOptimalSolution(support.Matrix)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution.Result)
 	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
 }
 

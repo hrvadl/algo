@@ -24,7 +24,7 @@ func (v Variable) IsZ() bool {
 }
 
 func (v Variable) IsU() bool {
-	return v.FirstStageName == "u"
+	return v.SecondStageName == "u"
 }
 
 func (v Variable) IsZero() bool {
@@ -417,7 +417,6 @@ func (m *Matrix) FillTopTitle() {
 		if i == len(m.Rows[0])-1 {
 			m.TopTitle[i] = Variable{
 				FirstStageName:  "1",
-				FirstStageIndex: i,
 				SecondStageName: "w",
 			}
 		} else {
@@ -429,6 +428,23 @@ func (m *Matrix) FillTopTitle() {
 			}
 		}
 	}
+}
+
+func (m *Matrix) GetUCount() int {
+	var total int
+	for _, variable := range m.LeftTitle {
+		if variable.IsU() {
+			total++
+		}
+	}
+
+	for _, variable := range m.TopTitle {
+		if variable.IsU() {
+			total++
+		}
+	}
+
+	return total
 }
 
 func (m *Matrix) GetXCount() int {
