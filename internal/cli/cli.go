@@ -133,8 +133,7 @@ func HandleSolveLinearInequation(isInteger bool) {
 
 	m := matrix.Matrix{
 		Rows:      make([]matrix.Row, 0, n+1),
-		LeftTitle: make(map[int]matrix.Variable),
-		TopTitle:  make(map[int]matrix.Variable),
+		LeftTitle: make([]matrix.Variable, n+1),
 	}
 
 	for i := range n {

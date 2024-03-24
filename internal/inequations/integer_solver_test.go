@@ -21,15 +21,15 @@ func TestFindIntegerSolution(t *testing.T) {
 					{1, 3, 4},
 					{-1, -4, 0},
 				},
-				LeftTitle: map[int]matrix.Variable{
-					0: {Name: "y", Index: 0},
-					1: {Name: "y", Index: 1},
-					2: {Name: "z"},
+				LeftTitle: []matrix.Variable{
+					{Name: "y", Index: 0},
+					{Name: "y", Index: 1},
+					{Name: "z"},
 				},
-				TopTitle: map[int]matrix.Variable{
-					0: {Name: "x", Index: 0},
-					1: {Name: "x", Index: 1},
-					2: {Name: "1"},
+				TopTitle: []matrix.Variable{
+					{Name: "x", Index: 0},
+					{Name: "x", Index: 1},
+					{Name: "1"},
 				},
 			},
 			expected: matrix.Matrix{
@@ -39,16 +39,16 @@ func TestFindIntegerSolution(t *testing.T) {
 					{-3.03, 1, 1},
 					{1, 1, 5},
 				},
-				LeftTitle: map[int]matrix.Variable{
-					0: {Name: "y", Index: 0},
-					1: {Name: "x", Index: 1},
-					2: {Name: "x", Index: 0},
-					3: {Name: "z"},
+				LeftTitle: []matrix.Variable{
+					{Name: "y", Index: 0},
+					{Name: "x", Index: 1},
+					{Name: "x", Index: 0},
+					{Name: "z"},
 				},
-				TopTitle: map[int]matrix.Variable{
-					0: {Name: "s", Index: 0},
-					1: {Name: "y", Index: 1},
-					2: {Name: "1"},
+				TopTitle: []matrix.Variable{
+					{Name: "s", Index: 0},
+					{Name: "y", Index: 1},
+					{Name: "1"},
 				},
 			},
 		},
@@ -61,17 +61,17 @@ func TestFindIntegerSolution(t *testing.T) {
 					{3, 3, 1, 13},
 					{-4, -5, -1, 0},
 				},
-				LeftTitle: map[int]matrix.Variable{
-					0: {Name: "y", Index: 0},
-					1: {Name: "y", Index: 1},
-					2: {Name: "y", Index: 2},
-					3: {Name: "z"},
+				LeftTitle: []matrix.Variable{
+					{Name: "y", Index: 0},
+					{Name: "y", Index: 1},
+					{Name: "y", Index: 2},
+					{Name: "z"},
 				},
-				TopTitle: map[int]matrix.Variable{
-					0: {Name: "x", Index: 0},
-					1: {Name: "x", Index: 1},
-					2: {Name: "x", Index: 2},
-					3: {Name: "1"},
+				TopTitle: []matrix.Variable{
+					{Name: "x", Index: 0},
+					{Name: "x", Index: 1},
+					{Name: "x", Index: 2},
+					{Name: "1"},
 				},
 			},
 			expected: matrix.Matrix{
@@ -83,19 +83,19 @@ func TestFindIntegerSolution(t *testing.T) {
 					{-0.73, -0.18, 0, 0},
 					{0.36, 0.09, 1, 19},
 				},
-				LeftTitle: map[int]matrix.Variable{
-					0: {Name: "x", Index: 0},
-					1: {Name: "x", Index: 1},
-					2: {Name: "x", Index: 2},
-					3: {Name: "y", Index: 1},
-					4: {Name: "s"},
-					5: {Name: "z"},
+				LeftTitle: []matrix.Variable{
+					{Name: "x", Index: 0},
+					{Name: "x", Index: 1},
+					{Name: "x", Index: 2},
+					{Name: "y", Index: 1},
+					{Name: "s"},
+					{Name: "z"},
 				},
-				TopTitle: map[int]matrix.Variable{
-					0: {Name: "s"},
-					1: {Name: "y", Index: 0},
-					2: {Name: "y", Index: 2},
-					3: {Name: "1"},
+				TopTitle: []matrix.Variable{
+					{Name: "s"},
+					{Name: "y", Index: 0},
+					{Name: "y", Index: 2},
+					{Name: "1"},
 				},
 			},
 		},

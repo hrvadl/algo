@@ -27,8 +27,8 @@ func (v Variable) IsZero() bool {
 
 type Matrix struct {
 	Rows      []Row
-	LeftTitle map[int]Variable
-	TopTitle  map[int]Variable
+	LeftTitle []Variable
+	TopTitle  []Variable
 }
 
 func (m *Matrix) Rank() int {
@@ -268,20 +268,7 @@ func (m *Matrix) DeleteRow(row int) (Matrix, error) {
 		newM.Rows[i] = newM.Rows[i][:len(row)-1]
 	}
 
-	delete(newM.TopTitle, col)
-	tmp := make([]Variable, len(newM.TopTitle))
-	for i, variable := range newM.TopTitle {
-		if i < col {
-			tmp[i] = variable
-		} else {
-			tmp[i-1] = variable
-		}
-	}
-
-	clear(newM.TopTitle)
-	for i, variable := range tmp {
-		newM.TopTitle[i] = variable
-	}
+	newM.TopTitle = append(newM.TopTitle[:col], newM.TopTitle[col+1:]...)
 
 	return newM, nil
 }
@@ -400,7 +387,7 @@ func (m *Matrix) SetSwapped(col, row int) {
 }
 
 func (m *Matrix) FillLeftTitle() {
-	m.LeftTitle = make(map[int]Variable)
+	m.LeftTitle = make([]Variable, len(m.Rows))
 	for i := range m.Rows {
 		if i == len(m.Rows)-1 {
 			m.LeftTitle[i] = Variable{"1", 0}
@@ -411,7 +398,7 @@ func (m *Matrix) FillLeftTitle() {
 }
 
 func (m *Matrix) FillTopTitle() {
-	m.TopTitle = make(map[int]Variable)
+	m.TopTitle = make([]Variable, len(m.Rows[0]))
 	for i := range m.Rows[0] {
 		if i == len(m.Rows[0])-1 {
 			m.TopTitle[i] = Variable{"z", i}
@@ -474,8 +461,8 @@ func (m *Matrix) InsertRow(row Row) Matrix {
 
 	for row, variable := range newM.LeftTitle {
 		if variable.IsZ() {
-			newM.LeftTitle[row+1] = variable
 			newM.LeftTitle[row] = Variable{Name: "s"}
+			newM.LeftTitle = append(newM.LeftTitle, variable)
 			break
 		}
 	}
