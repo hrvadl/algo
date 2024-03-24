@@ -64,7 +64,7 @@ func FindOptimalSolution(m matrix.Matrix) (*Solution, error) {
 	if err != nil {
 		for row, variable := range m.LeftTitle {
 			if variable.IsX() {
-				res[variable.Index] = matrix.RoundTo(m.Rows[row][lastCol], 2)
+				res[variable.FirstStageIndex] = matrix.RoundTo(m.Rows[row][lastCol], 2)
 			}
 		}
 
@@ -99,7 +99,7 @@ func FindSupportSolution(m matrix.Matrix) (Solution, error) {
 	if err != nil {
 		for row, variable := range m.LeftTitle {
 			if variable.IsX() {
-				res[variable.Index] = m.Rows[row][lastCol]
+				res[variable.FirstStageIndex] = m.Rows[row][lastCol]
 			}
 		}
 		return Solution{Matrix: m, Result: res}, nil

@@ -9,20 +9,26 @@ import (
 type Row = []float64
 
 type Variable struct {
-	Name  string
-	Index int
+	FirstStageName   string
+	FirstStageIndex  int
+	SecondStageName  string
+	SecondStageIndex int
 }
 
 func (v Variable) IsX() bool {
-	return v.Name == "x"
+	return v.FirstStageName == "x"
 }
 
 func (v Variable) IsZ() bool {
-	return v.Name == "z"
+	return v.FirstStageName == "z"
+}
+
+func (v Variable) IsU() bool {
+	return v.FirstStageName == "u"
 }
 
 func (v Variable) IsZero() bool {
-	return v.Name == "0"
+	return v.FirstStageName == "0"
 }
 
 type Matrix struct {
@@ -390,9 +396,17 @@ func (m *Matrix) FillLeftTitle() {
 	m.LeftTitle = make([]Variable, len(m.Rows))
 	for i := range m.Rows {
 		if i == len(m.Rows)-1 {
-			m.LeftTitle[i] = Variable{"1", 0}
+			m.LeftTitle[i] = Variable{
+				FirstStageName:  "z",
+				SecondStageName: "1",
+			}
 		} else {
-			m.LeftTitle[i] = Variable{"y", i}
+			m.LeftTitle[i] = Variable{
+				FirstStageName:   "y",
+				FirstStageIndex:  i,
+				SecondStageName:  "u",
+				SecondStageIndex: i,
+			}
 		}
 	}
 }
@@ -401,9 +415,18 @@ func (m *Matrix) FillTopTitle() {
 	m.TopTitle = make([]Variable, len(m.Rows[0]))
 	for i := range m.Rows[0] {
 		if i == len(m.Rows[0])-1 {
-			m.TopTitle[i] = Variable{"z", i}
+			m.TopTitle[i] = Variable{
+				FirstStageName:  "1",
+				FirstStageIndex: i,
+				SecondStageName: "w",
+			}
 		} else {
-			m.TopTitle[i] = Variable{"x", i}
+			m.TopTitle[i] = Variable{
+				FirstStageName:   "x",
+				FirstStageIndex:  i,
+				SecondStageName:  "v",
+				SecondStageIndex: i,
+			}
 		}
 	}
 }
@@ -461,7 +484,7 @@ func (m *Matrix) InsertRow(row Row) Matrix {
 
 	for row, variable := range newM.LeftTitle {
 		if variable.IsZ() {
-			newM.LeftTitle[row] = Variable{Name: "s"}
+			newM.LeftTitle[row] = Variable{FirstStageName: "s"}
 			newM.LeftTitle = append(newM.LeftTitle, variable)
 			break
 		}

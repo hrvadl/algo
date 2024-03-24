@@ -150,9 +150,9 @@ func HandleSolveLinearInequation(isInteger bool) {
 		}
 
 		if isEquation {
-			m.LeftTitle[i] = matrix.Variable{Name: "0"}
+			m.LeftTitle[i] = matrix.Variable{FirstStageName: "0"}
 		} else {
-			m.LeftTitle[i] = matrix.Variable{Name: "y", Index: i}
+			m.LeftTitle[i] = matrix.Variable{FirstStageName: "y", FirstStageIndex: i}
 		}
 
 		m.Rows = append(m.Rows, row)
