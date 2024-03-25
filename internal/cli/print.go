@@ -16,6 +16,7 @@ func PrintHelp() {
 	fmt.Printf("Calculate linear equation system:    %s\n", SolveLinearEquationOption)
 	fmt.Printf("Calculate linear inequation:         %s\n", SolveLinearInequationOption)
 	fmt.Printf("Calculate integer linear inequation: %s\n", SolveIntegerLinearInequationOption)
+	fmt.Printf("Calculate doubled linear inequation: %s\n", SolveDoubledLinearInequationOption)
 	fmt.Printf("Print this message:                  %s\n", HelpOption)
 	fmt.Printf("Clear the screen:                    %s\n", ClearOption)
 	fmt.Println()

@@ -1,6 +1,8 @@
 package inequations
 
-import "github.com/hrvadl/algo/internal/matrix"
+import (
+	"github.com/hrvadl/algo/internal/matrix"
+)
 
 type DoubledOptimalSolution struct {
 	MinSolution
@@ -60,54 +62,6 @@ func FindMaxDoubledWithOptimalSolution(m matrix.Matrix) (*DoubledOptimalSolution
 	for col, variable := range optimal.Matrix.TopTitle {
 		if variable.IsU() {
 			res.MinSolution.Result[variable.SecondStageIndex] = optimal.Matrix.Rows[lastRow][col]
-		}
-	}
-
-	return &res, nil
-}
-
-func FindMaxDoubledWithSupportSolution(m matrix.Matrix) (*DoubledSolution, error) {
-	support, err := FindSupportSolution(m)
-	if err != nil {
-		return nil, err
-	}
-
-	res := DoubledSolution{
-		Max: support,
-		Min: Solution{
-			Matrix: support.Matrix,
-			Result: make([]float64, support.Matrix.GetUCount()),
-		},
-	}
-
-	lastRow := len(support.Matrix.Rows) - 1
-	for col, variable := range support.Matrix.TopTitle {
-		if variable.IsU() {
-			res.Min.Result[variable.SecondStageIndex] = support.Matrix.Rows[lastRow][col]
-		}
-	}
-
-	return &res, nil
-}
-
-func FindMinDoubledWithSupportSolution(m matrix.Matrix) (*DoubledSolution, error) {
-	support, err := FindMinWithSupportSolution(m)
-	if err != nil {
-		return nil, err
-	}
-
-	res := DoubledSolution{
-		Min: support,
-		Max: Solution{
-			Matrix: support.Matrix,
-			Result: make([]float64, support.Matrix.GetXCount()),
-		},
-	}
-
-	lastRow := len(support.Matrix.Rows) - 1
-	for col, variable := range support.Matrix.TopTitle {
-		if variable.IsU() {
-			res.Max.Result[variable.SecondStageIndex] = support.Matrix.Rows[lastRow][col]
 		}
 	}
 

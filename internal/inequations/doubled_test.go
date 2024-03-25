@@ -215,11 +215,10 @@ func TestFindMaxDoubledWithSupportSolution(t *testing.T) {
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			if actual, _ := FindMaxDoubledWithSupportSolution(tt.m); actual == nil ||
-				!reflect.DeepEqual(
-					*actual,
-					tt.expected,
-				) {
+			if actual, _ := FindSupportSolution(tt.m); !reflect.DeepEqual(
+				actual,
+				tt.expected.Max,
+			) {
 				t.Fatalf("want: %v\ngot:%v", tt.expected, actual)
 			}
 		})
@@ -549,12 +548,17 @@ func TestFindMaxDoubledWithOptimalSolution(t *testing.T) {
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
-			support, _ := FindMaxDoubledWithSupportSolution(tt.m)
-			if actual, _ := FindMaxDoubledWithOptimalSolution(support.Max.Matrix); actual == nil ||
-				!reflect.DeepEqual(
-					*actual,
-					tt.expected,
-				) {
+			support, err := FindSupportSolution(tt.m)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			actual, err := FindMaxDoubledWithOptimalSolution(support.Matrix)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if actual == nil || !reflect.DeepEqual(*actual, tt.expected) {
 				t.Fatalf("want: %v\ngot:%v", tt.expected, actual)
 			}
 		})

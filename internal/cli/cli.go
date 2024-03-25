@@ -46,6 +46,8 @@ func Start() {
 			HandleSolveLinearInequation(CalculateInequationFlag)
 		case SolveIntegerLinearInequationOption:
 			HandleSolveLinearInequation(CalculateInequationFlag | CalculateIntegerFlag)
+		case SolveDoubledLinearInequationOption:
+			HandleSolveLinearInequation(CalculateInequationFlag | CalculateDoubledFlag)
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -158,7 +160,12 @@ func HandleSolveLinearInequation(flag uint8) {
 		if isEquation {
 			m.LeftTitle[i] = matrix.Variable{FirstStageName: "0"}
 		} else {
-			m.LeftTitle[i] = matrix.Variable{FirstStageName: "y", FirstStageIndex: i}
+			m.LeftTitle[i] = matrix.Variable{
+				FirstStageName:   "y",
+				FirstStageIndex:  i,
+				SecondStageName:  "u",
+				SecondStageIndex: i,
+			}
 		}
 
 		m.Rows = append(m.Rows, row)
@@ -252,21 +259,25 @@ func HandleGetDoubledMinWithOptimalSolution(m matrix.Matrix) {
 	}
 
 	fmt.Printf("\nFinding the support solution...\n")
-	support, err := inequations.FindSupportSolution(m)
+	support, err := inequations.FindMinWithSupportSolution(m)
 	if err != nil {
 		PrintError(err)
 		return
 	}
 
-	optimal, err := inequations.FindMinWithOptimalSolution(support.Matrix)
+	optimal, err := inequations.FindMinDoubledWithOptimalSolution(support.Matrix)
 	if err != nil {
 		PrintError(err)
 		return
 	}
 
 	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
-	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution.Result)
+
+	fmt.Printf("\nYour optimal solution (min): \n%v\n", optimal.MinSolution.Result)
+	fmt.Printf("\nYour optimal solution (max): \n%v\n", optimal.MaxSolution.Result)
+
 	fmt.Printf("\nYour min: \n%v\n", optimal.Min)
+	fmt.Printf("\nYour max (doubled): \n%v\n", optimal.Max)
 }
 
 func HandleGetDoubledMaxWithOptimalSolution(m matrix.Matrix) {
@@ -283,15 +294,16 @@ func HandleGetDoubledMaxWithOptimalSolution(m matrix.Matrix) {
 		return
 	}
 
-	optimal, err := inequations.FindMaxWithOptimalSolution(support.Matrix)
+	optimal, err := inequations.FindMaxDoubledWithOptimalSolution(support.Matrix)
 	if err != nil {
 		PrintError(err)
 		return
 	}
 
 	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
-	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.Solution.Result)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.MaxSolution.Result)
 	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
+	fmt.Printf("\nYour min (doubled): \n%v\n", optimal.Min)
 }
 
 func HandleGetMinWithOptimalSolution(m matrix.Matrix) {
@@ -302,7 +314,7 @@ func HandleGetMinWithOptimalSolution(m matrix.Matrix) {
 	}
 
 	fmt.Printf("\nFinding the support solution...\n")
-	support, err := inequations.FindSupportSolution(m)
+	support, err := inequations.FindMinWithSupportSolution(m)
 	if err != nil {
 		PrintError(err)
 		return

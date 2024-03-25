@@ -15,6 +15,7 @@ const (
 	SolveLinearEquationOption          = "solve_equtaion"
 	SolveLinearInequationOption        = "solve_inequation"
 	SolveIntegerLinearInequationOption = "solve_integer"
+	SolveDoubledLinearInequationOption = "solve_doubled"
 	HelpOption                         = "help"
 	ClearOption                        = "clear"
 )
@@ -67,6 +68,7 @@ func ChooseOption() (Option, error) {
 		option != ExitOption &&
 		option != SolveLinearInequationOption &&
 		option != SolveIntegerLinearInequationOption &&
+		option != SolveDoubledLinearInequationOption &&
 		option != ClearOption {
 		return "", errors.New("invalid options is chosen")
 	}
