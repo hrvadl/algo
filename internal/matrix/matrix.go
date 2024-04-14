@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 )
 
 type Row = []float64
@@ -283,6 +284,17 @@ func (m *Matrix) DeleteRow(row int) (Matrix, error) {
 	return newM, nil
 }
 
+func (m *Matrix) Add(n float64) *Matrix {
+	resm := m.Copy()
+	for i, row := range m.Rows {
+		for j := range row {
+			resm.Rows[i][j] += n
+		}
+	}
+
+	return &resm
+}
+
 func (m *Matrix) DivideBy(n float64) (Matrix, error) {
 	if n == 0 {
 		return Matrix{}, errors.New("divide by zero")
@@ -493,6 +505,17 @@ func (m *Matrix) NegativeRowFor(row Row) Row {
 		row[i] /= -1
 	}
 	return row
+}
+
+func (m *Matrix) Min() float64 {
+	min := 0.
+	for _, row := range m.Rows {
+		if newm := slices.Min(row); newm < min {
+			min = newm
+		}
+	}
+
+	return min
 }
 
 type MinMax struct {

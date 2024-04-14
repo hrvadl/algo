@@ -588,3 +588,39 @@ func TestMaxMinRow(t *testing.T) {
 		})
 	}
 }
+
+func TestMaxMin(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected float64
+	}{
+		{
+			name: "Should find max min correctly",
+			m: Matrix{
+				Rows: []Row{
+					{4, 6, -7, 5},
+					{-3, 2, 8, 6},
+					{3, 1, -6, -9},
+				},
+			},
+			expected: -9,
+		},
+		{
+			name: "Should handle empty matrix correctly",
+			m: Matrix{
+				Rows: []Row{},
+			},
+			expected: 0,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tt.m.Min(); !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}

@@ -3,12 +3,14 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/hrvadl/algo/internal/equations"
+	"github.com/hrvadl/algo/internal/games"
 	"github.com/hrvadl/algo/internal/inequations"
 	"github.com/hrvadl/algo/internal/matrix"
 	"github.com/hrvadl/algo/pkg/tm"
@@ -48,6 +50,8 @@ func Start() {
 			HandleSolveLinearInequation(CalculateInequationFlag | CalculateIntegerFlag)
 		case SolveDoubledLinearInequationOption:
 			HandleSolveLinearInequation(CalculateInequationFlag | CalculateDoubledFlag)
+		case GetGameStrategies:
+			HandleSolveGame()
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -122,6 +126,71 @@ func HandleSolveLinearEquation() {
 
 	fmt.Println("\nThe result of solving equation: ")
 	fmt.Printf("%v\n", res)
+}
+
+func HandleSolveGame() {
+	m, err := HandleGetMatrix()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
+	m.Print()
+
+	clean, err := m.GetCleanSolution()
+	if err == nil {
+		fmt.Printf(
+			"Found clean solution: (%d,%d) with game weight: %v",
+			clean.Row,
+			clean.Col,
+			clean.Val,
+		)
+		return
+	}
+
+	minabs := math.Abs(m.Min())
+	m = *m.Add(minabs)
+	compat, err := games.CompleteMatrixToCompatible(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	m.FillLeftTitle()
+	m.FillTopTitle()
+	m = *compat
+	m.InitialCols = len(m.Rows[0])
+	m.InitialRows = len(m.Rows) - 1
+	fmt.Printf("\nJust confirmation. Your matrix after correcting: \n\n")
+	m.Print()
+
+	support, err := inequations.FindSupportSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	optimal, err := inequations.FindMaxDoubledWithOptimalSolution(support.Matrix)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
+	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.MaxSolution.Result)
+	fmt.Printf("\nYour doubled optimal solution: \n%v\n", optimal.MinSolution.Result)
+	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
+	fmt.Printf("\nYour min (doubled): \n%v\n", optimal.Min)
+
+	gameWeight := games.GetGameWeight(optimal.MaxSolution.Matrix)
+	correctedGameWeight := games.CorrectGameWeight(gameWeight, minabs)
+	firstPlayerStrategy := games.CorrectMixedStrategy(optimal.MaxSolution.Result, gameWeight)
+	secondPlayerStrategy := games.CorrectMixedStrategy(optimal.MinSolution.Result, gameWeight)
+
+	fmt.Printf("\n\nFirst player strategy: %v", firstPlayerStrategy)
+	fmt.Printf("\nSecond player strategy: %v", secondPlayerStrategy)
+	fmt.Printf("\nGame Weight: %v\n\n", correctedGameWeight)
 }
 
 func HandleSolveLinearInequation(flag uint8) {
