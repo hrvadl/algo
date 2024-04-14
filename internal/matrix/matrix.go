@@ -32,6 +32,24 @@ func (v Variable) IsZero() bool {
 	return v.FirstStageName == "0"
 }
 
+func (v Variable) String() string {
+	if v.FirstStageName == "" && v.SecondStageName != "" {
+		return fmt.Sprintf("%s%d", v.SecondStageName, v.SecondStageIndex)
+	}
+
+	if v.SecondStageName == "" && v.FirstStageName != "" {
+		return fmt.Sprintf("%s%d", v.FirstStageName, v.FirstStageIndex)
+	}
+
+	return fmt.Sprintf(
+		"%s%d %s%d",
+		v.FirstStageName,
+		v.FirstStageIndex,
+		v.SecondStageName,
+		v.SecondStageIndex,
+	)
+}
+
 type Matrix struct {
 	InitialRows int
 	InitialCols int
@@ -633,6 +651,15 @@ func (m *Matrix) Print() {
 		}
 		fmt.Println()
 	}
+}
+
+func RoundRowTo(s []float64, precision int) []float64 {
+	n := make([]float64, len(s))
+	copy(n, s)
+	for i, el := range n {
+		n[i] = RoundTo(el, precision)
+	}
+	return n
 }
 
 func RoundTo(num float64, precision int) float64 {

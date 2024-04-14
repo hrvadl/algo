@@ -41,7 +41,7 @@ func CorrectGameWeight(w, minabs float64) float64 {
 	return matrix.RoundTo(w-minabs, 2)
 }
 
-func CorrectMixedStrategy(strategy []float64, w float64) []float64 {
+func CorrectMixedStrategy(strategy Weights, w Weight) []float64 {
 	res := make([]float64, len(strategy))
 	for i := range strategy {
 		res[i] = matrix.RoundTo(strategy[i]*w, 2)

@@ -177,11 +177,14 @@ func HandleSolveGame() {
 		return
 	}
 
-	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
-	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.MaxSolution.Result)
-	fmt.Printf("\nYour doubled optimal solution: \n%v\n", optimal.MinSolution.Result)
-	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
-	fmt.Printf("\nYour min (doubled): \n%v\n", optimal.Min)
+	fmt.Printf("\nYour support solution: \n%v\n", matrix.RoundRowTo(support.Result, 2))
+	fmt.Printf("\nYour optimal solution: \n%v\n", matrix.RoundRowTo(optimal.MaxSolution.Result, 2))
+	fmt.Printf(
+		"\nYour doubled optimal solution: \n%v\n",
+		matrix.RoundRowTo(optimal.MinSolution.Result, 2),
+	)
+	fmt.Printf("\nYour max: \n%v\n", matrix.RoundTo(optimal.Max, 2))
+	fmt.Printf("\nYour min (doubled): \n%v\n", matrix.RoundTo(optimal.Min, 2))
 
 	gameWeight := games.GetGameWeight(optimal.MaxSolution.Matrix)
 	correctedGameWeight := games.CorrectGameWeight(gameWeight, minabs)
@@ -191,6 +194,19 @@ func HandleSolveGame() {
 	fmt.Printf("\n\nFirst player strategy: %v", firstPlayerStrategy)
 	fmt.Printf("\nSecond player strategy: %v", secondPlayerStrategy)
 	fmt.Printf("\nGame Weight: %v\n\n", correctedGameWeight)
+
+	fmt.Println("How many times do you want to simulate game?")
+	n, err := ReadPositiveInt()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	games.SimulateGame(games.SimulationOptions{
+		Times:                n,
+		FirstPlayerStrategy:  firstPlayerStrategy,
+		SecondPlayerStrategy: secondPlayerStrategy,
+	})
 }
 
 func HandleSolveLinearInequation(flag uint8) {
