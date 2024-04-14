@@ -495,6 +495,92 @@ func (m *Matrix) NegativeRowFor(row Row) Row {
 	return row
 }
 
+type MinMax struct {
+	Row int
+	Col int
+	Val float64
+}
+
+func (m *Matrix) GetCleanSolution() (*MinMax, error) {
+	c, err := m.MinMaxColumn()
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := m.MaxMinRow()
+	if err != nil {
+		return nil, err
+	}
+
+	if r.Val != c.Val {
+		return nil, errors.New("this matrix does not have clean solution")
+	}
+
+	return r, nil
+}
+
+func (m *Matrix) MinMaxColumn() (*MinMax, error) {
+	if len(m.Rows) == 0 {
+		return nil, errors.New("cannot find minmax for empty matrix")
+	}
+	maxs := make([]MinMax, len(m.Rows[0]))
+
+	for i := range m.Rows[0] {
+		val := MinMax{-1, -1, -1000 * 100.}
+		for j, row := range m.Rows {
+			if row[i] >= val.Val {
+				val = MinMax{
+					Row: j,
+					Col: i,
+					Val: m.Rows[j][i],
+				}
+			}
+		}
+
+		maxs[i] = val
+	}
+
+	minmax := maxs[0]
+	for _, v := range maxs {
+		if v.Val < minmax.Val {
+			minmax = v
+		}
+	}
+
+	return &minmax, nil
+}
+
+func (m *Matrix) MaxMinRow() (*MinMax, error) {
+	maxs := make([]MinMax, len(m.Rows))
+	if len(maxs) == 0 {
+		return nil, errors.New("cannot find minmax for empty matrix")
+	}
+
+	for i, row := range m.Rows {
+		val := MinMax{-1, -1, 1000 * 100.}
+		for j := range row {
+			if row[j] <= val.Val {
+				val = MinMax{
+					Row: i,
+					Col: j,
+					Val: row[j],
+				}
+			}
+		}
+
+		maxs[i] = val
+	}
+
+	maxmin := maxs[0]
+	for _, v := range maxs {
+		if v.Val > maxmin.Val {
+			maxmin = v
+		}
+	}
+
+	return &maxmin, nil
+}
+
 func (m *Matrix) InsertRow(row Row) Matrix {
 	newM := m.Copy()
 	lastCol := len(newM.Rows) - 1

@@ -506,3 +506,85 @@ func TestInsertRow(t *testing.T) {
 		})
 	}
 }
+
+func TestMinMaxColumn(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected *MinMax
+	}{
+		{
+			name: "Should find max min correctly",
+			m: Matrix{
+				Rows: []Row{
+					{4, 6, 7, 5},
+					{3, 2, 8, 6},
+					{3, 1, 6, 9},
+				},
+			},
+			expected: &MinMax{
+				Row: 0,
+				Col: 0,
+				Val: 4,
+			},
+		},
+		{
+			name: "Should handle empty matrix correctly",
+			m: Matrix{
+				Rows: []Row{},
+			},
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, _ := tt.m.MinMaxColumn()
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestMaxMinRow(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected *MinMax
+	}{
+		{
+			name: "Should find max min correctly",
+			m: Matrix{
+				Rows: []Row{
+					{4, 6, 7, 5},
+					{3, 2, 8, 6},
+					{3, 1, 6, 9},
+				},
+			},
+			expected: &MinMax{
+				Row: 0,
+				Col: 0,
+				Val: 4,
+			},
+		},
+		{
+			name: "Should handle empty matrix correctly",
+			m: Matrix{
+				Rows: []Row{},
+			},
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, _ := tt.m.MaxMinRow()
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}
