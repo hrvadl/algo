@@ -8,8 +8,35 @@ import (
 
 type Row = []float64
 
+type Variable struct {
+	FirstStageName   string
+	FirstStageIndex  int
+	SecondStageName  string
+	SecondStageIndex int
+}
+
+func (v Variable) IsX() bool {
+	return v.FirstStageName == "x"
+}
+
+func (v Variable) IsZ() bool {
+	return v.FirstStageName == "z"
+}
+
+func (v Variable) IsU() bool {
+	return v.SecondStageName == "u"
+}
+
+func (v Variable) IsZero() bool {
+	return v.FirstStageName == "0"
+}
+
 type Matrix struct {
-	Rows []Row
+	InitialRows int
+	InitialCols int
+	Rows        []Row
+	LeftTitle   []Variable
+	TopTitle    []Variable
 }
 
 func (m *Matrix) Rank() int {
@@ -61,10 +88,36 @@ func (m *Matrix) JordanEliminate(col, row int) (Matrix, error) {
 	}
 
 	resm.Rows[row][col] = 1
-
+	resm.SetSwapped(col, row)
 	for i := range resm.Rows[row] {
 		if i != col {
 			resm.Rows[row][i] *= -1
+		}
+	}
+
+	for i, rowRes := range resm.Rows {
+		for j := range rowRes {
+			if i != row && j != col {
+				resm.Rows[i][j] = m.Rows[i][j]*eliminated - m.Rows[i][col]*m.Rows[row][j]
+			}
+		}
+	}
+
+	return resm.DivideBy(eliminated)
+}
+
+func (m *Matrix) JordanEliminateModified(col, row int) (Matrix, error) {
+	resm := m.Copy()
+	eliminated := resm.Rows[row][col]
+	if eliminated == 0 {
+		return Matrix{}, errors.New("divide by zero")
+	}
+
+	resm.Rows[row][col] = 1
+	resm.SetSwapped(col, row)
+	for i := range resm.Rows {
+		if i != row {
+			resm.Rows[i][col] *= -1
 		}
 	}
 
@@ -156,7 +209,11 @@ func (m *Matrix) MinorFor(col, row int) Matrix {
 
 func (m *Matrix) Copy() Matrix {
 	res := Matrix{
-		Rows: make([][]float64, len(m.Rows)),
+		Rows:        make([][]float64, len(m.Rows)),
+		LeftTitle:   m.LeftTitle,
+		TopTitle:    m.TopTitle,
+		InitialRows: m.InitialRows,
+		InitialCols: m.InitialCols,
 	}
 
 	for i, row := range m.Rows {
@@ -166,6 +223,64 @@ func (m *Matrix) Copy() Matrix {
 	}
 
 	return res
+}
+
+func (m *Matrix) DeleteZeros() (Matrix, error) {
+	toDelete := -1
+	for row, variable := range m.LeftTitle {
+		if variable.IsZero() {
+			toDelete = row
+			break
+		}
+	}
+
+	if toDelete == -1 {
+		return *m, nil
+	}
+
+	newM, err := m.DeleteRow(toDelete)
+	if err != nil {
+		return Matrix{}, err
+	}
+
+	return newM.DeleteZeros()
+}
+
+func (m *Matrix) DeleteRow(row int) (Matrix, error) {
+	col, err := m.FirstPositiveInRowExceptLastColumn(row)
+	if err != nil {
+		return Matrix{}, fmt.Errorf("can't delete. no positive elements in row %v", row)
+	}
+
+	toDeleteRow, err := m.FindMinPositiveFor(col)
+	if err != nil {
+		return Matrix{}, fmt.Errorf("can't delete. %w", err)
+	}
+
+	newM, err := m.JordanEliminateModified(col, toDeleteRow)
+	if err != nil {
+		return Matrix{}, err
+	}
+
+	if !m.TopTitle[col].IsZero() {
+		return newM, nil
+	}
+
+	for i, row := range newM.Rows {
+		for j := range row {
+			if j <= col {
+				continue
+			}
+
+			newM.Rows[i][j-1] = newM.Rows[i][j]
+		}
+
+		newM.Rows[i] = newM.Rows[i][:len(row)-1]
+	}
+
+	newM.TopTitle = append(newM.TopTitle[:col], newM.TopTitle[col+1:]...)
+
+	return newM, nil
 }
 
 func (m *Matrix) DivideBy(n float64) (Matrix, error) {
@@ -192,6 +307,210 @@ func (m *Matrix) Round() Matrix {
 	}
 
 	return resm
+}
+
+func (m *Matrix) FirstNegativeInRowExceptLastColumn(row int) (col int, err error) {
+	for i := 0; i < len(m.Rows[row])-1; i++ {
+		if m.Rows[row][i] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no negative numbers found in the row %v", row)
+}
+
+func (m *Matrix) FirstPositiveInRowExceptLastColumn(row int) (int, error) {
+	for i := 0; i < len(m.Rows[row])-1; i++ {
+		if m.Rows[row][i] > 0 {
+			return i, nil
+		}
+	}
+
+	return 0, fmt.Errorf("no negative numbers found in the row %v", row)
+}
+
+func (m *Matrix) FirstNegativeRowInLastColumn() (int, error) {
+	lastCol := len(m.Rows[0]) - 1
+	for i := 0; i < len(m.Rows)-1; i++ {
+		if m.Rows[i][lastCol] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("no negatives found")
+}
+
+func (m *Matrix) FirstNegativeColumnInLastRow() (int, error) {
+	lastRow := len(m.Rows) - 1
+	fmt.Printf("\nFinding the optimal solution...\n")
+	for i := 0; i < len(m.Rows[lastRow])-1; i++ {
+		if m.Rows[lastRow][i] < 0 {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("no negatives found")
+}
+
+func (m *Matrix) FindMinPositiveFor(col int) (row int, err error) {
+	min := 0.
+	row = -1
+	lastCol := len(m.Rows[0]) - 1
+
+	for j := 0; j < len(m.Rows)-1; j++ {
+		if m.Rows[j][col] == 0 {
+			continue
+		}
+
+		res := m.Rows[j][lastCol] / m.Rows[j][col]
+		if res < 0 {
+			continue
+		}
+
+		if res == 0 && m.Rows[j][col] < 0 {
+			continue
+		}
+
+		if (min == 0 && row == -1) || min > res {
+			min = res
+			row = j
+		}
+	}
+
+	if row == -1 {
+		return 0, errors.New("cannot find element to jordan eliminate")
+	}
+
+	return row, nil
+}
+
+func (m *Matrix) SetSwapped(col, row int) {
+	if len(m.LeftTitle) == 0 {
+		m.FillLeftTitle()
+	}
+
+	if len(m.TopTitle) == 0 {
+		m.FillTopTitle()
+	}
+
+	m.TopTitle[col], m.LeftTitle[row] = m.LeftTitle[row], m.TopTitle[col]
+}
+
+func (m *Matrix) FillLeftTitle() {
+	m.LeftTitle = make([]Variable, len(m.Rows))
+	for i := range m.Rows {
+		if i == len(m.Rows)-1 {
+			m.LeftTitle[i] = Variable{
+				FirstStageName:  "z",
+				SecondStageName: "1",
+			}
+		} else {
+			m.LeftTitle[i] = Variable{
+				FirstStageName:   "y",
+				FirstStageIndex:  i,
+				SecondStageName:  "u",
+				SecondStageIndex: i,
+			}
+		}
+	}
+}
+
+func (m *Matrix) FillTopTitle() {
+	m.TopTitle = make([]Variable, len(m.Rows[0]))
+	for i := range m.Rows[0] {
+		if i == len(m.Rows[0])-1 {
+			m.TopTitle[i] = Variable{
+				FirstStageName:  "1",
+				SecondStageName: "w",
+			}
+		} else {
+			m.TopTitle[i] = Variable{
+				FirstStageName:   "x",
+				FirstStageIndex:  i,
+				SecondStageName:  "v",
+				SecondStageIndex: i,
+			}
+		}
+	}
+}
+
+func (m *Matrix) GetUCount() int {
+	var total int
+	for _, variable := range m.LeftTitle {
+		if variable.IsU() {
+			total++
+		}
+	}
+
+	for _, variable := range m.TopTitle {
+		if variable.IsU() {
+			total++
+		}
+	}
+
+	return total
+}
+
+func (m *Matrix) GetXCount() int {
+	var total int
+	for _, variable := range m.LeftTitle {
+		if variable.IsX() {
+			total++
+		}
+	}
+
+	for _, variable := range m.TopTitle {
+		if variable.IsX() {
+			total++
+		}
+	}
+
+	return total
+}
+
+func (m *Matrix) IntegerLimitationFor(row int) Row {
+	res := make(Row, 0, len(m.Rows[row]))
+
+	for _, el := range m.Rows[row] {
+		integer, fraction := math.Modf(el)
+		if fraction == 0 {
+			res = append(res, el)
+			continue
+		}
+
+		if integer < 0 || fraction < 0 {
+			integer--
+		}
+
+		res = append(res, RoundTo(el-integer, 2))
+	}
+
+	return res
+}
+
+func (m *Matrix) NegativeRowFor(row Row) Row {
+	for i := range row {
+		row[i] /= -1
+	}
+	return row
+}
+
+func (m *Matrix) InsertRow(row Row) Matrix {
+	newM := m.Copy()
+	lastCol := len(newM.Rows) - 1
+	old := newM.Rows[lastCol]
+	newM.Rows = append(newM.Rows, old)
+	newM.Rows[lastCol] = row
+
+	for row, variable := range newM.LeftTitle {
+		if variable.IsZ() {
+			newM.LeftTitle[row] = Variable{FirstStageName: "s"}
+			newM.LeftTitle = append(newM.LeftTitle, variable)
+			break
+		}
+	}
+
+	return newM
 }
 
 func (m *Matrix) Print() {

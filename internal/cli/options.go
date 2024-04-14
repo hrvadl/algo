@@ -9,12 +9,15 @@ import (
 type Option = string
 
 const (
-	ExitOption                = "exit"
-	InverseMatrixOption       = "inverse"
-	GetRankOption             = "rank"
-	SolveLinearEquationOption = "solve_linear"
-	HelpOption                = "help"
-	ClearOption               = "clear"
+	ExitOption                         = "exit"
+	InverseMatrixOption                = "inverse"
+	GetRankOption                      = "rank"
+	SolveLinearEquationOption          = "solve_equtaion"
+	SolveLinearInequationOption        = "solve_inequation"
+	SolveIntegerLinearInequationOption = "solve_integer"
+	SolveDoubledLinearInequationOption = "solve_doubled"
+	HelpOption                         = "help"
+	ClearOption                        = "clear"
 )
 
 func ReadInt() (int, error) {
@@ -31,9 +34,30 @@ func ReadInt() (int, error) {
 	return option, err
 }
 
+func ReadPositiveInt() (int, error) {
+	n, err := ReadInt()
+	if err != nil {
+		return 0, err
+	}
+
+	if n <= 0 {
+		return 0, errors.New("number should be greater than 0")
+	}
+
+	return n, nil
+}
+
+func ReadWord() (string, error) {
+	var str string
+	if _, err := fmt.Scanln(&str); err != nil {
+		return "", errors.New("invalid input")
+	}
+	return str, nil
+}
+
 func ChooseOption() (Option, error) {
-	var option string
-	if _, err := fmt.Scanln(&option); err != nil {
+	option, err := ReadWord()
+	if err != nil {
 		return "", errors.New("invalid input")
 	}
 
@@ -42,6 +66,9 @@ func ChooseOption() (Option, error) {
 		option != SolveLinearEquationOption &&
 		option != HelpOption &&
 		option != ExitOption &&
+		option != SolveLinearInequationOption &&
+		option != SolveIntegerLinearInequationOption &&
+		option != SolveDoubledLinearInequationOption &&
 		option != ClearOption {
 		return "", errors.New("invalid options is chosen")
 	}
