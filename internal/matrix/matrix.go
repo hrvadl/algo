@@ -32,9 +32,11 @@ func (v Variable) IsZero() bool {
 }
 
 type Matrix struct {
-	Rows      []Row
-	LeftTitle []Variable
-	TopTitle  []Variable
+	InitialRows int
+	InitialCols int
+	Rows        []Row
+	LeftTitle   []Variable
+	TopTitle    []Variable
 }
 
 func (m *Matrix) Rank() int {
@@ -207,9 +209,11 @@ func (m *Matrix) MinorFor(col, row int) Matrix {
 
 func (m *Matrix) Copy() Matrix {
 	res := Matrix{
-		Rows:      make([][]float64, len(m.Rows)),
-		LeftTitle: m.LeftTitle,
-		TopTitle:  m.TopTitle,
+		Rows:        make([][]float64, len(m.Rows)),
+		LeftTitle:   m.LeftTitle,
+		TopTitle:    m.TopTitle,
+		InitialRows: m.InitialRows,
+		InitialCols: m.InitialCols,
 	}
 
 	for i, row := range m.Rows {

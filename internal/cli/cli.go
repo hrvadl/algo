@@ -158,7 +158,11 @@ func HandleSolveLinearInequation(flag uint8) {
 		}
 
 		if isEquation {
-			m.LeftTitle[i] = matrix.Variable{FirstStageName: "0"}
+			m.LeftTitle[i] = matrix.Variable{
+				FirstStageName:   "0",
+				SecondStageName:  "u",
+				SecondStageIndex: i,
+			}
 		} else {
 			m.LeftTitle[i] = matrix.Variable{
 				FirstStageName:   "y",
@@ -183,6 +187,8 @@ func HandleSolveLinearInequation(flag uint8) {
 	}
 
 	m.FillTopTitle()
+	m.InitialCols = len(m.Rows[0])
+	m.InitialRows = len(m.Rows) - 1
 
 	switch minMax {
 	case "max":
@@ -302,6 +308,7 @@ func HandleGetDoubledMaxWithOptimalSolution(m matrix.Matrix) {
 
 	fmt.Printf("\nYour support solution: \n%v\n", support.Result)
 	fmt.Printf("\nYour optimal solution: \n%v\n", optimal.MaxSolution.Result)
+	fmt.Printf("\nYour doubled optimal solution: \n%v\n", optimal.MinSolution.Result)
 	fmt.Printf("\nYour max: \n%v\n", optimal.Max)
 	fmt.Printf("\nYour min (doubled): \n%v\n", optimal.Min)
 }
