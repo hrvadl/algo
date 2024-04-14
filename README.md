@@ -15,7 +15,7 @@ The repo contains lab-\* branches each of each holds the source code for specifi
 Run the following command from the root of the repo:
 
 ```bash
-make run
+task run
 ```
 
 ## Examples 🧐

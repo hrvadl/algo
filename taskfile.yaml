@@ -8,12 +8,6 @@ tasks:
 
   run-matrix:
     desc: "Run lab1-5 program"
-    aliases: [runm]
+    aliases: [run]
     cmds:
       - go run ./cmd/module1/main.go
-
-  run-game:
-    desc: "Run lab6-rr program"
-    aliases: [rung]
-    cmds:
-      - go run ./cmd/module2/main.go
