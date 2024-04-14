@@ -20,12 +20,17 @@ func FindMinDoubledWithOptimalSolution(m matrix.Matrix) (*DoubledOptimalSolution
 		return nil, err
 	}
 
+	minResLen := optimal.Matrix.InitialCols
+	if minResLen == 0 {
+		minResLen = optimal.Matrix.GetUCount()
+	}
+
 	res := DoubledOptimalSolution{
 		MinSolution: *optimal,
 		MaxSolution: MaxSolution{
 			Solution: Solution{
 				Matrix: optimal.Matrix,
-				Result: make([]float64, m.InitialRows),
+				Result: make([]float64, minResLen),
 			},
 			Max: optimal.Min,
 		},
@@ -47,12 +52,17 @@ func FindMaxDoubledWithOptimalSolution(m matrix.Matrix) (*DoubledOptimalSolution
 		return nil, err
 	}
 
+	maxResLen := optimal.Matrix.InitialCols
+	if maxResLen == 0 {
+		maxResLen = optimal.Matrix.GetUCount()
+	}
+
 	res := DoubledOptimalSolution{
 		MaxSolution: *optimal,
 		MinSolution: MinSolution{
 			Solution: Solution{
 				Matrix: optimal.Matrix,
-				Result: make([]float64, optimal.Matrix.InitialRows),
+				Result: make([]float64, maxResLen),
 			},
 			Min: optimal.Max,
 		},

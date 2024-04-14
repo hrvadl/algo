@@ -558,8 +558,12 @@ func TestFindMaxDoubledWithOptimalSolution(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if actual == nil || !reflect.DeepEqual(*actual, tt.expected) {
+			if actual == nil {
 				t.Fatalf("want: %v\ngot:%v", tt.expected, actual)
+			}
+
+			if !reflect.DeepEqual(*actual, tt.expected) {
+				t.Fatalf("want: %v\ngot:%v", tt.expected, *actual)
 			}
 		})
 	}
