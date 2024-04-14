@@ -65,14 +65,11 @@ func SimulateGame(opt SimulationOptions) []SimulationStep {
 func GetStrategyFromNum(weights Weights, n float64) int {
 	var sumPrev float64
 	for i, w := range weights {
-		if n == w+sumPrev {
-			if i < len(weights)-1 {
-				return i + 1
-			}
-			return i
+		if w == 0 {
+			continue
 		}
 
-		if n < w+sumPrev {
+		if n <= w+sumPrev {
 			return i
 		}
 

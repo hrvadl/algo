@@ -135,19 +135,22 @@ func HandleSolveGame() {
 		return
 	}
 
+	startingPoint := m
 	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
 	m.Print()
 
-	clean, err := m.GetCleanSolution()
+	clean, err := m.GetCleanStrategySolution()
 	if err == nil {
 		fmt.Printf(
-			"Found clean solution: (%d,%d) with game weight: %v",
+			"\n\nFound clean solution: (%d,%d) with game weight: %v\n\n",
 			clean.Row,
 			clean.Col,
 			clean.Val,
 		)
 		return
 	}
+
+	PrintError(err)
 
 	minabs := math.Abs(m.Min())
 	m = *m.Add(minabs)
@@ -202,11 +205,16 @@ func HandleSolveGame() {
 		return
 	}
 
-	games.SimulateGame(games.SimulationOptions{
+	steps := games.SimulateGame(games.SimulationOptions{
 		Times:                n,
 		FirstPlayerStrategy:  firstPlayerStrategy,
 		SecondPlayerStrategy: secondPlayerStrategy,
+		Matrix:               startingPoint,
 	})
+
+	for i, s := range steps {
+		fmt.Printf("idx: %d %+v\n\n", i, s)
+	}
 }
 
 func HandleSolveLinearInequation(flag uint8) {

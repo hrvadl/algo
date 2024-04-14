@@ -25,7 +25,7 @@ func TestGetStrategyFromNum(t *testing.T) {
 			name:     "Should get strategy correctly",
 			weights:  Weights{0.5, 0.5},
 			num:      0.5,
-			expected: 1,
+			expected: 0,
 		},
 		{
 			name:     "Should get strategy correctly",
@@ -56,6 +56,12 @@ func TestGetStrategyFromNum(t *testing.T) {
 			weights:  Weights{0, 1},
 			num:      1,
 			expected: 1,
+		},
+		{
+			name:     "Should get strategy correctly",
+			weights:  Weights{0.7, 0.3},
+			num:      0.6,
+			expected: 0,
 		},
 	}
 

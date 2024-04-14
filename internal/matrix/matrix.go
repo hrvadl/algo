@@ -542,7 +542,7 @@ type MinMax struct {
 	Val float64
 }
 
-func (m *Matrix) GetCleanSolution() (*MinMax, error) {
+func (m *Matrix) GetCleanStrategySolution() (*MinMax, error) {
 	c, err := m.MinMaxColumn()
 	if err != nil {
 		return nil, err
@@ -554,7 +554,7 @@ func (m *Matrix) GetCleanSolution() (*MinMax, error) {
 	}
 
 	if r.Val != c.Val {
-		return nil, errors.New("this matrix does not have clean solution")
+		return nil, errors.New("this matrix does not have clean strategy solution")
 	}
 
 	return r, nil
