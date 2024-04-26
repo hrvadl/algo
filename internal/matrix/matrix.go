@@ -640,6 +640,57 @@ func (m *Matrix) InsertRow(row Row) Matrix {
 	return newM
 }
 
+func (m *Matrix) NewRisk() Matrix {
+	if len(m.Rows) == 0 {
+		return Matrix{}
+	}
+
+	newM := m.Copy()
+	maxs := make(Row, len(m.Rows[0]))
+	for i, col := range m.Rows[0] {
+		maxCol := col
+		for j := range m.Rows {
+			if m.Rows[j][i] > maxCol {
+				maxCol = m.Rows[j][i]
+			}
+			maxs[i] = maxCol
+		}
+	}
+
+	for i := range m.Rows[0] {
+		for j := range m.Rows {
+			newM.Rows[j][i] = maxs[i] - newM.Rows[j][i]
+		}
+	}
+
+	return newM
+}
+
+func (m *Matrix) MultiplyByVector(p Row) (*Matrix, error) {
+	if mlen := len(m.Rows); mlen != 0 && len(p) != len(m.Rows[0]) {
+		return nil, errors.New("p slice should be same length as matrix row")
+	}
+
+	newM := m.Copy()
+	for i, row := range newM.Rows {
+		for j := range row {
+			newM.Rows[i][j] *= p[j]
+		}
+	}
+
+	return &newM, nil
+}
+
+func (m *Matrix) SumRows() Row {
+	sum := make(Row, len(m.Rows))
+	for i, row := range m.Rows {
+		for j := range row {
+			sum[i] += m.Rows[i][j]
+		}
+	}
+	return sum
+}
+
 func (m *Matrix) Print() {
 	for _, row := range m.Rows {
 		for _, col := range row {

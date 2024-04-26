@@ -52,6 +52,9 @@ func Start() {
 			HandleSolveLinearInequation(CalculateInequationFlag | CalculateDoubledFlag)
 		case GetGameStrategies:
 			HandleSolveGame()
+		case SolveGameWithNature:
+			HandleGameWithNature()
+			HandleSolveGame()
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -215,6 +218,17 @@ func HandleSolveGame() {
 	for i, s := range steps {
 		fmt.Printf("idx: %d %+v\n\n", i, s)
 	}
+}
+
+func HandleGameWithNature() {
+	m, err := HandleGetMatrix()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
+	m.Print()
 }
 
 func HandleSolveLinearInequation(flag uint8) {

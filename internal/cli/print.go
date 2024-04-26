@@ -18,6 +18,7 @@ func PrintHelp() {
 	fmt.Printf("Calculate integer linear inequation: %s\n", SolveIntegerLinearInequationOption)
 	fmt.Printf("Calculate doubled linear inequation: %s\n", SolveDoubledLinearInequationOption)
 	fmt.Printf("Get game strategies:                 %s\n", GetGameStrategies)
+	fmt.Printf("Solve game with nature:              %s\n", SolveGameWithNature)
 	fmt.Printf("Print this message:                  %s\n", HelpOption)
 	fmt.Printf("Clear the screen:                    %s\n", ClearOption)
 	fmt.Println()
