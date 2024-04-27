@@ -506,3 +506,228 @@ func TestInsertRow(t *testing.T) {
 		})
 	}
 }
+
+func TestMinMaxColumn(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected *MinMax
+	}{
+		{
+			name: "Should find max min correctly",
+			m: Matrix{
+				Rows: []Row{
+					{4, 6, 7, 5},
+					{3, 2, 8, 6},
+					{3, 1, 6, 9},
+				},
+			},
+			expected: &MinMax{
+				Row: 0,
+				Col: 0,
+				Val: 4,
+			},
+		},
+		{
+			name: "Should handle empty matrix correctly",
+			m: Matrix{
+				Rows: []Row{},
+			},
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, _ := tt.m.MinMaxColumn()
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestMaxMinRow(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected *MinMax
+	}{
+		{
+			name: "Should find max min correctly",
+			m: Matrix{
+				Rows: []Row{
+					{4, 6, 7, 5},
+					{3, 2, 8, 6},
+					{3, 1, 6, 9},
+				},
+			},
+			expected: &MinMax{
+				Row: 0,
+				Col: 0,
+				Val: 4,
+			},
+		},
+		{
+			name: "Should handle empty matrix correctly",
+			m: Matrix{
+				Rows: []Row{},
+			},
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, _ := tt.m.MaxMinRow()
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestMaxMin(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected float64
+	}{
+		{
+			name: "Should find max min correctly",
+			m: Matrix{
+				Rows: []Row{
+					{4, 6, -7, 5},
+					{-3, 2, 8, 6},
+					{3, 1, -6, -9},
+				},
+			},
+			expected: -9,
+		},
+		{
+			name: "Should handle empty matrix correctly",
+			m: Matrix{
+				Rows: []Row{},
+			},
+			expected: 0,
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tt.m.Min(); !reflect.DeepEqual(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestNewRisk(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected Matrix
+	}{
+		{
+			name: "Should calculate risk matrix correctly",
+			m: Matrix{
+				Rows: []Row{
+					{-1, 1, 1, 4},
+					{-1, -2, 2, 3},
+					{3, -1, 3, 2},
+				},
+			},
+			expected: Matrix{
+				Rows: []Row{
+					{4, 0, 2, 0},
+					{4, 3, 1, 1},
+					{0, 2, 0, 2},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := tt.m.NewRisk()
+			for i := range got.Rows {
+				for j := range got.Rows[i] {
+					if got.Rows[i][j] != tt.expected.Rows[i][j] {
+						t.Fatalf("Expected: %v, got: %v", tt.expected.Rows[i][j], got.Rows[i][j])
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestMultiplyByVector(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		v        Row
+		expected Matrix
+	}{
+		{
+			name: "Should multiply by vector correctly",
+			m: Matrix{
+				Rows: []Row{
+					{1, 2, 3},
+					{4, 5, 6},
+					{7, 8, 9},
+				},
+			},
+			v: Row{3, 2, 2},
+			expected: Matrix{
+				Rows: []Row{
+					{3, 4, 6},
+					{12, 10, 12},
+					{21, 16, 18},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, _ := tt.m.MultiplyByVector(tt.v)
+			if !reflect.DeepEqual(got.Rows, tt.expected.Rows) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected.Rows, got.Rows)
+			}
+		})
+	}
+}
+
+func TestSumRows(t *testing.T) {
+	tc := []struct {
+		name     string
+		m        Matrix
+		expected Row
+	}{
+		{
+			name: "Should sum rows correctly",
+			m: Matrix{
+				Rows: []Row{
+					{1, 2, 3},
+					{4, 5, 6},
+					{7, 8, 9},
+				},
+			},
+			expected: Row{6, 15, 24},
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tt.m.SumRows(); !slices.Equal(got, tt.expected) {
+				t.Fatalf("Expected to get: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}

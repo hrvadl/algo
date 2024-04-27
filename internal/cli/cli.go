@@ -3,12 +3,14 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/hrvadl/algo/internal/equations"
+	"github.com/hrvadl/algo/internal/games"
 	"github.com/hrvadl/algo/internal/inequations"
 	"github.com/hrvadl/algo/internal/matrix"
 	"github.com/hrvadl/algo/pkg/tm"
@@ -48,6 +50,10 @@ func Start() {
 			HandleSolveLinearInequation(CalculateInequationFlag | CalculateIntegerFlag)
 		case SolveDoubledLinearInequationOption:
 			HandleSolveLinearInequation(CalculateInequationFlag | CalculateDoubledFlag)
+		case GetGameStrategies:
+			HandleSolveGame()
+		case SolveGameWithNature:
+			HandleGameWithNature()
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -122,6 +128,160 @@ func HandleSolveLinearEquation() {
 
 	fmt.Println("\nThe result of solving equation: ")
 	fmt.Printf("%v\n", res)
+}
+
+func HandleSolveGame() {
+	m, err := HandleGetMatrix()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	startingPoint := m
+	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
+	m.Print()
+
+	clean, err := m.GetCleanStrategySolution()
+	if err == nil {
+		fmt.Printf(
+			"\n\nFound clean solution: (%d,%d) with game weight: %v\n\n",
+			clean.Row,
+			clean.Col,
+			clean.Val,
+		)
+		return
+	}
+
+	PrintError(err)
+
+	minabs := math.Abs(m.Min())
+	m = *m.Add(minabs)
+	compat, err := games.CompleteMatrixToCompatible(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	m.FillLeftTitle()
+	m.FillTopTitle()
+	m = *compat
+	m.InitialCols = len(m.Rows[0])
+	m.InitialRows = len(m.Rows) - 1
+	fmt.Printf("\nJust confirmation. Your matrix after correcting: \n\n")
+	m.Print()
+
+	support, err := inequations.FindSupportSolution(m)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	optimal, err := inequations.FindMaxDoubledWithOptimalSolution(support.Matrix)
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nYour support solution: \n%v\n", matrix.RoundRowTo(support.Result, 2))
+	fmt.Printf("\nYour optimal solution: \n%v\n", matrix.RoundRowTo(optimal.MaxSolution.Result, 2))
+	fmt.Printf(
+		"\nYour doubled optimal solution: \n%v\n",
+		matrix.RoundRowTo(optimal.MinSolution.Result, 2),
+	)
+	fmt.Printf("\nYour max: \n%v\n", matrix.RoundTo(optimal.Max, 2))
+	fmt.Printf("\nYour min (doubled): \n%v\n", matrix.RoundTo(optimal.Min, 2))
+
+	gameWeight := games.GetGameWeight(optimal.MaxSolution.Matrix)
+	correctedGameWeight := games.CorrectGameWeight(gameWeight, minabs)
+	firstPlayerStrategy := games.CorrectMixedStrategy(optimal.MaxSolution.Result, gameWeight)
+	secondPlayerStrategy := games.CorrectMixedStrategy(optimal.MinSolution.Result, gameWeight)
+
+	fmt.Printf("\n\nFirst player strategy: %v", firstPlayerStrategy)
+	fmt.Printf("\nSecond player strategy: %v", secondPlayerStrategy)
+	fmt.Printf("\nGame Weight: %v\n\n", correctedGameWeight)
+
+	fmt.Println("How many times do you want to simulate game?")
+	n, err := ReadPositiveInt()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	steps := games.SimulateGame(games.SimulationOptions{
+		Times:                n,
+		FirstPlayerStrategy:  firstPlayerStrategy,
+		SecondPlayerStrategy: secondPlayerStrategy,
+		Matrix:               startingPoint,
+	})
+
+	for i, s := range steps {
+		fmt.Printf("idx: %d %+v\n\n", i, s)
+	}
+}
+
+func HandleGameWithNature() {
+	m, err := HandleGetMatrix()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
+	m.Print()
+
+	fmt.Printf("\nType y coefficient for pessimist optimist strategy:\n")
+	y, err := ReadFloat()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nType v coefficient for laplas strategy:\n")
+	v, err := ReadFloat()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nType the p vector for bayes straregy:\n")
+	p, err := GetMatrix(1, len(m.Rows[0]))
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf(
+		"\n\nSolution with maxmin (Wald) strategy: %v",
+		games.ToHumanReadable(games.SolveWithMaxMinStrategy(m)),
+	)
+	fmt.Printf(
+		"\n\nSolution with maxmax strategy: %v",
+		games.ToHumanReadable(games.SolveWithMaxMaxStrategy(m)),
+	)
+	fmt.Printf(
+		"\n\nSolution with pessimist optimist (Gurwic) strategy: %v",
+		games.ToHumanReadable(games.SolveWithPessimismOptimismStrategy(m, y)),
+	)
+	fmt.Printf(
+		"\n\nSolution with minmax (Sevige) strategy: %v",
+		games.ToHumanReadable(games.SolveWithMinMaxStrategy(m)),
+	)
+
+	bsol, err := games.SolveWithBayesPrinicple(m, p.Rows[0])
+	if err != nil {
+		PrintError(fmt.Errorf("cannot solve with bayes principle: %w", err))
+		return
+	}
+
+	fmt.Printf("\n\nSolution with bayes strategy: %v", games.ToHumanReadable(bsol))
+
+	lsol, err := games.SolveWithLaplasPrinciple(m, v)
+	if err != nil {
+		PrintError(fmt.Errorf("cannot solve with laplas principle: %w", err))
+		return
+	}
+
+	fmt.Printf("\n\nSolution with laplas strategy: %v\n\n", games.ToHumanReadable(lsol))
 }
 
 func HandleSolveLinearInequation(flag uint8) {

@@ -16,9 +16,25 @@ const (
 	SolveLinearInequationOption        = "solve_inequation"
 	SolveIntegerLinearInequationOption = "solve_integer"
 	SolveDoubledLinearInequationOption = "solve_doubled"
+	GetGameStrategies                  = "game_strategies"
+	SolveGameWithNature                = "game_with_nature"
 	HelpOption                         = "help"
 	ClearOption                        = "clear"
 )
+
+func ReadFloat() (float64, error) {
+	var input string
+	if _, err := fmt.Scanln(&input); err != nil {
+		return 0, err
+	}
+
+	option, err := strconv.ParseFloat(input, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return option, err
+}
 
 func ReadInt() (int, error) {
 	var input string
@@ -69,6 +85,8 @@ func ChooseOption() (Option, error) {
 		option != SolveLinearInequationOption &&
 		option != SolveIntegerLinearInequationOption &&
 		option != SolveDoubledLinearInequationOption &&
+		option != GetGameStrategies &&
+		option != SolveGameWithNature &&
 		option != ClearOption {
 		return "", errors.New("invalid options is chosen")
 	}

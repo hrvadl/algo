@@ -1,0 +1,13 @@
+version: "3"
+
+tasks:
+  default:
+    desc: "Show available tasks"
+    cmds:
+      - task --list-all
+
+  run-matrix:
+    desc: "Run lab1-5 program"
+    aliases: [run]
+    cmds:
+      - go run ./cmd/module1/main.go

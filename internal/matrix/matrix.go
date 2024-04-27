@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 )
 
 type Row = []float64
@@ -29,6 +30,24 @@ func (v Variable) IsU() bool {
 
 func (v Variable) IsZero() bool {
 	return v.FirstStageName == "0"
+}
+
+func (v Variable) String() string {
+	if v.FirstStageName == "" && v.SecondStageName != "" {
+		return fmt.Sprintf("%s%d", v.SecondStageName, v.SecondStageIndex)
+	}
+
+	if v.SecondStageName == "" && v.FirstStageName != "" {
+		return fmt.Sprintf("%s%d", v.FirstStageName, v.FirstStageIndex)
+	}
+
+	return fmt.Sprintf(
+		"%s%d %s%d",
+		v.FirstStageName,
+		v.FirstStageIndex,
+		v.SecondStageName,
+		v.SecondStageIndex,
+	)
 }
 
 type Matrix struct {
@@ -283,6 +302,17 @@ func (m *Matrix) DeleteRow(row int) (Matrix, error) {
 	return newM, nil
 }
 
+func (m *Matrix) Add(n float64) *Matrix {
+	resm := m.Copy()
+	for i, row := range m.Rows {
+		for j := range row {
+			resm.Rows[i][j] += n
+		}
+	}
+
+	return &resm
+}
+
 func (m *Matrix) DivideBy(n float64) (Matrix, error) {
 	if n == 0 {
 		return Matrix{}, errors.New("divide by zero")
@@ -495,6 +525,103 @@ func (m *Matrix) NegativeRowFor(row Row) Row {
 	return row
 }
 
+func (m *Matrix) Min() float64 {
+	min := 0.
+	for _, row := range m.Rows {
+		if newm := slices.Min(row); newm < min {
+			min = newm
+		}
+	}
+
+	return min
+}
+
+type MinMax struct {
+	Row int
+	Col int
+	Val float64
+}
+
+func (m *Matrix) GetCleanStrategySolution() (*MinMax, error) {
+	c, err := m.MinMaxColumn()
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := m.MaxMinRow()
+	if err != nil {
+		return nil, err
+	}
+
+	if r.Val != c.Val {
+		return nil, errors.New("this matrix does not have clean strategy solution")
+	}
+
+	return r, nil
+}
+
+func (m *Matrix) MinMaxColumn() (*MinMax, error) {
+	if len(m.Rows) == 0 {
+		return nil, errors.New("cannot find minmax for empty matrix")
+	}
+	maxs := make([]MinMax, len(m.Rows[0]))
+
+	for i := range m.Rows[0] {
+		val := MinMax{-1, -1, -1000 * 100.}
+		for j, row := range m.Rows {
+			if row[i] >= val.Val {
+				val = MinMax{
+					Row: j,
+					Col: i,
+					Val: m.Rows[j][i],
+				}
+			}
+		}
+
+		maxs[i] = val
+	}
+
+	minmax := maxs[0]
+	for _, v := range maxs {
+		if v.Val < minmax.Val {
+			minmax = v
+		}
+	}
+
+	return &minmax, nil
+}
+
+func (m *Matrix) MaxMinRow() (*MinMax, error) {
+	maxs := make([]MinMax, len(m.Rows))
+	if len(maxs) == 0 {
+		return nil, errors.New("cannot find minmax for empty matrix")
+	}
+
+	for i, row := range m.Rows {
+		val := MinMax{-1, -1, 1000 * 100.}
+		for j := range row {
+			if row[j] <= val.Val {
+				val = MinMax{
+					Row: i,
+					Col: j,
+					Val: row[j],
+				}
+			}
+		}
+
+		maxs[i] = val
+	}
+
+	maxmin := maxs[0]
+	for _, v := range maxs {
+		if v.Val > maxmin.Val {
+			maxmin = v
+		}
+	}
+
+	return &maxmin, nil
+}
+
 func (m *Matrix) InsertRow(row Row) Matrix {
 	newM := m.Copy()
 	lastCol := len(newM.Rows) - 1
@@ -513,6 +640,57 @@ func (m *Matrix) InsertRow(row Row) Matrix {
 	return newM
 }
 
+func (m *Matrix) NewRisk() Matrix {
+	if len(m.Rows) == 0 {
+		return Matrix{}
+	}
+
+	newM := m.Copy()
+	maxs := make(Row, len(m.Rows[0]))
+	for i, col := range m.Rows[0] {
+		maxCol := col
+		for j := range m.Rows {
+			if m.Rows[j][i] > maxCol {
+				maxCol = m.Rows[j][i]
+			}
+			maxs[i] = maxCol
+		}
+	}
+
+	for i := range m.Rows[0] {
+		for j := range m.Rows {
+			newM.Rows[j][i] = maxs[i] - newM.Rows[j][i]
+		}
+	}
+
+	return newM
+}
+
+func (m *Matrix) MultiplyByVector(p Row) (*Matrix, error) {
+	if mlen := len(m.Rows); mlen != 0 && len(p) != len(m.Rows[0]) {
+		return nil, errors.New("p slice should be same length as matrix row")
+	}
+
+	newM := m.Copy()
+	for i, row := range newM.Rows {
+		for j := range row {
+			newM.Rows[i][j] *= p[j]
+		}
+	}
+
+	return &newM, nil
+}
+
+func (m *Matrix) SumRows() Row {
+	sum := make(Row, len(m.Rows))
+	for i, row := range m.Rows {
+		for j := range row {
+			sum[i] += m.Rows[i][j]
+		}
+	}
+	return sum
+}
+
 func (m *Matrix) Print() {
 	for _, row := range m.Rows {
 		for _, col := range row {
@@ -524,6 +702,15 @@ func (m *Matrix) Print() {
 		}
 		fmt.Println()
 	}
+}
+
+func RoundRowTo(s []float64, precision int) []float64 {
+	n := make([]float64, len(s))
+	copy(n, s)
+	for i, el := range n {
+		n[i] = RoundTo(el, precision)
+	}
+	return n
 }
 
 func RoundTo(num float64, precision int) float64 {
