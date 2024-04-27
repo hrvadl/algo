@@ -22,6 +22,20 @@ const (
 	ClearOption                        = "clear"
 )
 
+func ReadFloat() (float64, error) {
+	var input string
+	if _, err := fmt.Scanln(&input); err != nil {
+		return 0, err
+	}
+
+	option, err := strconv.ParseFloat(input, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return option, err
+}
+
 func ReadInt() (int, error) {
 	var input string
 	if _, err := fmt.Scanln(&input); err != nil {

@@ -54,7 +54,6 @@ func Start() {
 			HandleSolveGame()
 		case SolveGameWithNature:
 			HandleGameWithNature()
-			HandleSolveGame()
 		case ExitOption:
 			PrintExitMessage()
 			os.Exit(0)
@@ -229,6 +228,60 @@ func HandleGameWithNature() {
 
 	fmt.Printf("\nJust confirmation. Your matrix: \n\n")
 	m.Print()
+
+	fmt.Printf("\nType y coefficient for pessimist optimist strategy:\n")
+	y, err := ReadFloat()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nType v coefficient for laplas strategy:\n")
+	v, err := ReadFloat()
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf("\nType the p vector for bayes straregy:\n")
+	p, err := GetMatrix(1, len(m.Rows[0]))
+	if err != nil {
+		PrintError(err)
+		return
+	}
+
+	fmt.Printf(
+		"\n\nSolution with maxmin (Wald) strategy: %v",
+		games.ToHumanReadable(games.SolveWithMaxMinStrategy(m)),
+	)
+	fmt.Printf(
+		"\n\nSolution with maxmax strategy: %v",
+		games.ToHumanReadable(games.SolveWithMaxMaxStrategy(m)),
+	)
+	fmt.Printf(
+		"\n\nSolution with pessimist optimist (Gurwic) strategy: %v",
+		games.ToHumanReadable(games.SolveWithPessimismOptimismStrategy(m, y)),
+	)
+	fmt.Printf(
+		"\n\nSolution with minmax (Sevige) strategy: %v",
+		games.ToHumanReadable(games.SolveWithMinMaxStrategy(m)),
+	)
+
+	bsol, err := games.SolveWithBayesPrinicple(m, p.Rows[0])
+	if err != nil {
+		PrintError(fmt.Errorf("cannot solve with bayes principle: %w", err))
+		return
+	}
+
+	fmt.Printf("\n\nSolution with bayes strategy: %v", games.ToHumanReadable(bsol))
+
+	lsol, err := games.SolveWithLaplasPrinciple(m, v)
+	if err != nil {
+		PrintError(fmt.Errorf("cannot solve with laplas principle: %w", err))
+		return
+	}
+
+	fmt.Printf("\n\nSolution with laplas strategy: %v\n\n", games.ToHumanReadable(lsol))
 }
 
 func HandleSolveLinearInequation(flag uint8) {

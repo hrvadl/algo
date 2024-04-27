@@ -2,6 +2,8 @@ package games
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/hrvadl/algo/internal/matrix"
 	"github.com/hrvadl/algo/pkg/sliceh"
@@ -50,4 +52,12 @@ func SolveWithBayesPrinicple(m matrix.Matrix, p matrix.Row) ([]int, error) {
 	}
 
 	return sliceh.MaxIdxs(multiplied.SumRows()), nil
+}
+
+func ToHumanReadable(s []int) string {
+	var builder strings.Builder
+	for _, el := range s {
+		builder.WriteString(fmt.Sprintf("A%d ", el))
+	}
+	return builder.String()
 }
